@@ -3,15 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 로또번호 추첨기</title>
+    <title>AI 분석 로또 스튜디오</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>AI 로또번호 추첨기</h1>
-        <div id="lotto-numbers" class="lotto-numbers"></div>
-        <button id="generate-btn">번호 생성</button>
+    <div class="page">
+        <header class="hero">
+            <div class="hero-content">
+                <p class="eyebrow">AI 분석 로또 스튜디오</p>
+                <h1>회차별 데이터로 분석하고, 균형 있게 번호를 추천합니다.</h1>
+                <p class="subtitle">동행복권 공개 데이터를 기반으로 최근 흐름, 출현 빈도, 패턴 지표를 시각화합니다. 모든 추천은 통계적 실험이며 당첨을 보장하지 않습니다.</p>
+                <div class="hero-actions">
+                    <button class="btn primary" id="refresh-latest">최신 회차 불러오기</button>
+                    <button class="btn ghost" id="generate-reco">추천 다시 생성</button>
+                </div>
+                <p class="disclaimer">로또는 독립시행입니다. 분석 결과는 참고용입니다.</p>
+            </div>
+            <div class="hero-card" id="latest-card">
+                <div class="card-header">
+                    <div>
+                        <p class="card-title">최근 회차</p>
+                        <p class="card-subtitle" id="latest-date">불러오는 중...</p>
+                    </div>
+                    <span class="chip" id="latest-draw">-회</span>
+                </div>
+                <div class="numbers" id="latest-numbers"></div>
+                <div class="card-meta">
+                    <div>
+                        <span class="meta-label">1등 당첨금</span>
+                        <strong id="latest-prize">-</strong>
+                    </div>
+                    <div>
+                        <span class="meta-label">1등 인원</span>
+                        <strong id="latest-winners">-</strong>
+                    </div>
+                    <div>
+                        <span class="meta-label">총 판매액</span>
+                        <strong id="latest-sales">-</strong>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="panel" id="lookup">
+            <div class="panel-header">
+                <div>
+                    <h2>회차 조회</h2>
+                    <p>원하는 회차 번호를 입력하면 당첨 정보를 바로 확인할 수 있습니다.</p>
+                </div>
+                <div class="panel-actions">
+                    <input type="number" id="draw-input" placeholder="예: 1212" min="1">
+                    <button class="btn primary" id="draw-search">조회</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="draw-card" id="draw-detail">
+                    <div class="draw-info">
+                        <div>
+                            <p class="card-title">회차 정보</p>
+                            <p class="card-subtitle" id="draw-date">회차를 입력해 주세요.</p>
+                        </div>
+                        <span class="chip" id="draw-number">-회</span>
+                    </div>
+                    <div class="numbers" id="draw-numbers"></div>
+                    <div class="draw-meta" id="draw-meta"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="analysis">
+            <div class="panel-header">
+                <div>
+                    <h2>분석 대시보드</h2>
+                    <p>최근 회차 기준으로 번호 출현 빈도와 주요 패턴을 요약합니다.</p>
+                </div>
+                <div class="panel-actions">
+                    <select id="range-select">
+                        <option value="50">최근 50회</option>
+                        <option value="100" selected>최근 100회</option>
+                        <option value="200">최근 200회</option>
+                        <option value="400">최근 400회</option>
+                    </select>
+                    <button class="btn ghost" id="refresh-stats">분석 갱신</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="stats-grid">
+                    <div class="stats-card">
+                        <h3>출현 빈도</h3>
+                        <div class="frequency-grid" id="frequency-grid"></div>
+                    </div>
+                    <div class="stats-card">
+                        <h3>핫 & 콜드</h3>
+                        <div class="hot-cold">
+                            <div>
+                                <p class="meta-label">핫 넘버</p>
+                                <div class="pill-list" id="hot-list"></div>
+                            </div>
+                            <div>
+                                <p class="meta-label">콜드 넘버</p>
+                                <div class="pill-list" id="cold-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <h3>패턴 요약</h3>
+                        <div class="metric-list" id="summary-metrics"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="recommend">
+            <div class="panel-header">
+                <div>
+                    <h2>추천 번호</h2>
+                    <p>최근 출현 패턴을 반영해 6개 번호 조합을 제안합니다.</p>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn primary" id="generate-reco-2">새 추천 생성</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="recommendations" id="recommendations"></div>
+                <p class="disclaimer">추천 번호는 통계적 실험이며, 실제 당첨 확률과 무관합니다.</p>
+            </div>
+        </section>
     </div>
+
     <script src="main.js"></script>
 </body>
 </html>
