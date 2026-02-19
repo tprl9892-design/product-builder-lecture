@@ -1,97 +1,1254 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
- <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI 로또 추천 스튜디오</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>LottoMind-AI | FUTURE HUD</title>
+  <style>
+    :root{
+      --bg:#05070f;
+      --fg:#eaf0ff;
+      --muted:#a7b7da;
+      --line:rgba(255,255,255,0.12);
+      --glass:rgba(255,255,255,0.06);
+      --glass2:rgba(255,255,255,0.03);
+      --neon:#46f3ff;
+      --neon2:#8b5cff;
+      --hot:#ff5bd6;
+      --ok:#3dff9b;
+      --pill-bg: rgba(0,0,0,0.25);
+      --input-bg:#0b1020;
+      --panel-shadow: rgba(0,0,0,0.55);
+      --bg-grad-1: radial-gradient(1200px 800px at 18% 0%, rgba(70,243,255,0.14), transparent 60%);
+      --bg-grad-2: radial-gradient(1000px 700px at 85% 18%, rgba(139,92,255,0.18), transparent 60%);
+      --bg-grad-3: radial-gradient(900px 700px at 40% 90%, rgba(255,91,214,0.10), transparent 60%);
+    }
+    :root[data-theme="light"]{
+      --bg:#f3f6ff;
+      --fg:#0b1020;
+      --muted:#4c5c7a;
+      --line:rgba(11,16,32,0.12);
+      --glass:rgba(255,255,255,0.75);
+      --glass2:rgba(255,255,255,0.45);
+      --pill-bg: rgba(255,255,255,0.85);
+      --input-bg:#f6f8ff;
+      --panel-shadow: rgba(7,12,24,0.18);
+      --bg-grad-1: radial-gradient(1200px 800px at 18% 0%, rgba(70,243,255,0.12), transparent 60%);
+      --bg-grad-2: radial-gradient(1000px 700px at 85% 18%, rgba(139,92,255,0.10), transparent 60%);
+      --bg-grad-3: radial-gradient(900px 700px at 40% 90%, rgba(255,91,214,0.08), transparent 60%);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      color:var(--fg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif;
+      background:
+        var(--bg-grad-1),
+        var(--bg-grad-2),
+        var(--bg-grad-3),
+        var(--bg);
+      overflow-x:hidden;
+    }
+
+    /* Animated stars canvas sits behind everything */
+    #bgFx{
+      position:fixed; inset:0;
+      z-index:-1;
+      width:100%; height:100%;
+    }
+
+    .wrap{max-width:1180px;margin:0 auto;padding:22px 18px 40px;}
+    .top{
+      display:flex; gap:16px; flex-wrap:wrap; align-items:stretch;
+    }
+    .panel{
+      flex:1; min-width:320px;
+      border-radius:22px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, var(--glass), var(--glass2));
+      box-shadow: 0 22px 80px var(--panel-shadow);
+      backdrop-filter: blur(12px);
+      overflow:hidden;
+      position:relative;
+    }
+    .panel::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: linear-gradient(120deg, rgba(70,243,255,0.35), rgba(139,92,255,0.20), rgba(255,91,214,0.16));
+      filter: blur(18px);
+      opacity: .45;
+      pointer-events:none;
+    }
+    .panelHead{
+      padding:16px 16px 0;
+      position:relative;
+      z-index:1;
+    }
+    .brandRow{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(70,243,255,0.20);
+      background: rgba(70,243,255,0.06);
+      font-size:12px; color:var(--fg);
+      box-shadow: 0 0 0 1px rgba(139,92,255,0.10) inset;
+    }
+    .dot{
+      width:9px;height:9px;border-radius:50%;
+      background:var(--neon);
+      box-shadow: 0 0 18px rgba(70,243,255,0.95);
+      animation:pulseDot 1.3s infinite;
+    }
+    @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.75}}
+
+    h1{
+      margin:10px 0 6px;
+      font-size:20px;
+      letter-spacing:0.2px;
+    }
+    .desc{
+      margin:0 0 12px;
+      color:var(--muted);
+      font-size:13px; line-height:1.6;
+    }
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+
+    .controls{
+      display:flex; gap:10px; flex-wrap:wrap;
+      padding:0 16px 16px;
+      position:relative;
+      z-index:1;
+    }
+    .pill{
+      display:flex; align-items:center; gap:8px;
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: var(--pill-bg);
+      color:var(--muted);
+      font-size:12px;
+    }
+    .pill.themeBtn{
+      border:1px solid var(--line);
+      color:var(--fg);
+      cursor:pointer;
+      appearance:none;
+    }
+    .pill.themeBtn:hover{ filter:brightness(1.06); }
+    select{
+      background:var(--input-bg); color:var(--fg);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:12px;
+      padding:10px 10px;
+      outline:none;
+    }
+
+    /* ===== MEGA BUTTON (energy burst) ===== */
+    .megaBtn{
+      flex:1;
+      min-width:280px;
+      position:relative;
+      border:0;
+      border-radius:18px;
+      padding:16px 16px;
+      cursor:pointer;
+      color:var(--fg);
+      font-weight:900;
+      letter-spacing:0.6px;
+      text-transform:uppercase;
+      background:
+        radial-gradient(120px 80px at 25% 30%, rgba(70,243,255,0.35), transparent 60%),
+        radial-gradient(140px 100px at 80% 40%, rgba(139,92,255,0.28), transparent 65%),
+        linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.16);
+      box-shadow:
+        0 18px 60px rgba(0,0,0,0.55),
+        0 0 0 1px rgba(70,243,255,0.14) inset,
+        0 0 40px rgba(70,243,255,0.12);
+      overflow:hidden;
+      transform: translateZ(0);
+    }
+    .megaBtn .sub{
+      display:block;
+      margin-top:6px;
+      font-size:12px;
+      color:rgba(234,240,255,0.82);
+      font-weight:600;
+      text-transform:none;
+      letter-spacing:0;
+    }
+    .megaBtn::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: conic-gradient(from 180deg, rgba(70,243,255,0.0), rgba(70,243,255,0.35), rgba(139,92,255,0.25), rgba(255,91,214,0.22), rgba(70,243,255,0.0));
+      filter: blur(10px);
+      opacity:.55;
+      animation: spinGlow 3.2s linear infinite;
+    }
+    @keyframes spinGlow { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+    .megaBtn::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+      transform: translateX(-140%);
+      transition: transform .45s ease;
+      opacity:.65;
+      pointer-events:none;
+    }
+    .megaBtn:hover::after{ transform: translateX(140%); }
+    .megaBtn:active{ transform: scale(0.985); }
+    .megaBtn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.75); }
+
+    /* Energy sparks on button press */
+    .spark{
+      position:absolute;
+      width:10px; height:10px;
+      border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,0) 60%),
+                  radial-gradient(circle at 50% 50%, rgba(70,243,255,1), rgba(70,243,255,0) 70%);
+      box-shadow: 0 0 18px rgba(70,243,255,0.9), 0 0 24px rgba(139,92,255,0.6);
+      pointer-events:none;
+      animation: sparkFly .7s ease-out forwards;
+    }
+    @keyframes sparkFly{
+      to{
+        transform: translate(var(--dx), var(--dy)) scale(0.2);
+        opacity:0;
+      }
+    }
+
+    /* ===== layout cards ===== */
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:14px}
+    .card{
+      grid-column:span 12;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(12,16,28,0.72);
+      backdrop-filter: blur(12px);
+      padding:14px;
+      box-shadow: 0 16px 60px rgba(0,0,0,0.40);
+    }
+    @media (min-width:980px){
+      .c6{grid-column:span 6}
+      .c4{grid-column:span 4}
+    }
+    .card h2{margin:0 0 10px;font-size:14px; letter-spacing:.2px;}
+    .chips{display:flex;flex-wrap:wrap;gap:7px}
+    .chip{
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      font-size:12px;
+      box-shadow: 0 0 0 1px rgba(70,243,255,0.06) inset;
+    }
+    .muted{color:var(--muted);font-size:12px}
+    .log{
+      height:210px; overflow:auto; white-space:pre-wrap;
+      padding:12px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.28);
+      color:#d5e4ff;
+      font-size:12px; line-height:1.55;
+    }
+    .nums{display:flex;flex-wrap:wrap;gap:7px; margin-top:8px}
+    .ball{
+      width:36px; height:36px;
+      border-radius:50%;
+      display:grid; place-items:center;
+      font-weight:900;
+      background: linear-gradient(180deg, rgba(31,60,255,0.95), rgba(10,26,68,0.92));
+      border:1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 10px 26px rgba(70,243,255,0.10), 0 0 0 1px rgba(70,243,255,0.10) inset;
+    }
+    .kpiRow{
+      display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;
+    }
+    .kpi{
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid rgba(70,243,255,0.22);
+      background: rgba(70,243,255,0.06);
+      font-size:12px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .kpi b{color:rgba(234,240,255,0.92)}
+    .kpi .miniDot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 16px rgba(61,255,155,0.75)}
+
+    /* ===== HUD Overlay (robot compute) ===== */
+    .hud.hidden{ display:none; }
+    .hud{
+      position:fixed; inset:0; z-index:9999;
+      display:grid; place-items:center;
+    }
+    .hudBg{
+      position:absolute; inset:0;
+      background:
+        radial-gradient(1000px 700px at 20% 15%, rgba(70,243,255,0.12), transparent 60%),
+        radial-gradient(1000px 700px at 85% 25%, rgba(139,92,255,0.14), transparent 60%),
+        rgba(2,4,12,0.86);
+      backdrop-filter: blur(12px);
+    }
+    .hudFrame{
+      position:relative;
+      width:min(980px, 92vw);
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+      box-shadow: 0 40px 120px rgba(0,0,0,0.65);
+      overflow:hidden;
+    }
+    .hudFrame::before{
+      content:"";
+      position:absolute; inset:-3px;
+      background: linear-gradient(120deg, rgba(70,243,255,0.35), rgba(139,92,255,0.24), rgba(255,91,214,0.18));
+      filter: blur(18px);
+      opacity:.55;
+      pointer-events:none;
+    }
+    .hudFrame::after{
+      content:"";
+      position:absolute; inset:0;
+      background: repeating-linear-gradient(0deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 5px);
+      opacity:.10;
+      pointer-events:none;
+    }
+    .hudTop{
+      position:relative; z-index:1;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,0.10);
+    }
+    .hudTitle{display:flex; gap:10px; align-items:center}
+    .hudTitle .dot{width:10px;height:10px;border-radius:50%;background:var(--neon);box-shadow:0 0 20px rgba(70,243,255,0.9)}
+    .hudClose{
+      border:1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.06);
+      border-radius:14px;
+      padding:8px 10px;
+      cursor:pointer;
+      color:var(--fg);
+    }
+    .hudBody{
+      position:relative; z-index:1;
+      display:grid;
+      grid-template-columns: 340px 1fr;
+      gap:14px;
+      padding:16px;
+    }
+    @media (max-width:900px){
+      .hudBody{ grid-template-columns:1fr; }
+    }
+    .hudLeft{display:flex; flex-direction:column; gap:14px}
+    .hudRight{display:flex; flex-direction:column; gap:12px}
+    .hudConsole{
+      height:280px;
+      overflow:auto;
+      padding:12px;
+      border-radius:18px;
+      border:1px solid rgba(70,243,255,0.20);
+      background: rgba(0,0,0,0.34);
+      color:#d6e6ff;
+      white-space:pre-wrap;
+      line-height:1.55;
+    }
+    .hudMini{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+    }
+    .miniCard{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding:10px;
+    }
+    .miniTitle{color:var(--muted);font-size:12px}
+    .miniValue{margin-top:6px;font-weight:900;text-shadow:0 0 18px rgba(70,243,255,0.25)}
+    .hudMeter{
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding:12px;
+    }
+    .meterLabel{display:flex; justify-content:space-between; font-size:12px; color:#cfe0ff}
+    .meterTrack{
+      margin-top:10px;
+      height:12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.35);
+      overflow:hidden;
+    }
+    .meterBar{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(70,243,255,0.95), rgba(139,92,255,0.95), rgba(255,91,214,0.75));
+      box-shadow: 0 0 26px rgba(70,243,255,0.35);
+      transition: width .12s linear;
+    }
+    .meterSub{margin-top:10px; font-size:12px; color:var(--muted)}
+    .hudBottom{
+      position:relative; z-index:1;
+      padding:12px 16px;
+      border-top:1px solid rgba(255,255,255,0.10);
+      display:flex; justify-content:space-between; gap:10px;
+      color:#d3e3ff;
+    }
+    .glow{text-shadow:0 0 20px rgba(70,243,255,0.35)}
+
+    /* CSS Robot */
+    .robot{
+      position:relative;
+      width:260px; height:260px;
+      margin:0 auto;
+      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.55));
+    }
+    .antenna{
+      position:absolute; left:50%; top:8px; transform:translateX(-50%);
+      width:6px; height:46px; border-radius:99px;
+      background: linear-gradient(180deg, rgba(70,243,255,0.9), rgba(70,243,255,0.05));
+    }
+    .antenna::after{
+      content:""; position:absolute; left:50%; top:-10px; transform:translateX(-50%);
+      width:16px;height:16px;border-radius:50%;
+      background:var(--neon);
+      box-shadow:0 0 24px rgba(70,243,255,0.95);
+      animation: pulseA 1.1s infinite;
+    }
+    @keyframes pulseA{0%,100%{transform:translateX(-50%) scale(1);opacity:1}50%{transform:translateX(-50%) scale(1.12);opacity:.8}}
+
+    .head{
+      position:absolute; left:50%; top:46px; transform:translateX(-50%);
+      width:220px; height:122px; border-radius:22px;
+      border:1px solid rgba(255,255,255,0.16);
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+      overflow:hidden;
+    }
+    .visor{
+      position:absolute; left:14px; right:14px; top:16px; height:56px;
+      border-radius:18px;
+      background: linear-gradient(90deg, rgba(70,243,255,0.18), rgba(139,92,255,0.12));
+      border:1px solid rgba(70,243,255,0.28);
+      overflow:hidden;
+    }
+    .scanline{
+      position:absolute; left:0; right:0;
+      height:22px;
+      background: linear-gradient(180deg, transparent, rgba(70,243,255,0.38), transparent);
+      animation: scan 1.15s linear infinite;
+    }
+    @keyframes scan{0%{top:-28px}100%{top:88px}}
+    .eyes{
+      position:absolute; left:0; right:0; bottom:14px;
+      display:flex; justify-content:center; gap:10px;
+    }
+    .eyes span{
+      width:10px;height:10px;border-radius:50%;
+      background: rgba(70,243,255,0.95);
+      box-shadow: 0 0 16px rgba(70,243,255,0.85);
+      animation: blink 2.2s infinite;
+    }
+    .eyes span:nth-child(2){ animation-delay:.2s; background: rgba(139,92,255,0.92); }
+    .eyes span:nth-child(3){ animation-delay:.4s; background: rgba(255,91,214,0.82); }
+    @keyframes blink{0%,92%,100%{transform:scale(1)}94%{transform:scale(0.25)}96%{transform:scale(1)}}
+
+    .neck{
+      position:absolute; left:50%; top:170px; transform:translateX(-50%);
+      width:46px; height:18px; border-radius:10px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+    }
+    .torso{
+      position:absolute; left:50%; top:188px; transform:translateX(-50%);
+      width:240px; height:88px; border-radius:24px;
+      border:1px solid rgba(255,255,255,0.16);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+    }
+    .core{
+      position:absolute; left:50%; top:20px; transform:translateX(-50%);
+      width:46px; height:46px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, rgba(70,243,255,1), rgba(139,92,255,0.65), rgba(255,91,214,0.25), rgba(0,0,0,0));
+      box-shadow: 0 0 30px rgba(70,243,255,0.35);
+      animation: corePulse 1.1s infinite;
+    }
+    @keyframes corePulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.08)}}
+    .bars{
+      position:absolute; right:16px; top:18px;
+      display:flex; gap:6px; align-items:flex-end;
+    }
+    .bars i{
+      display:block;
+      width:6px; height:18px;
+      border-radius:999px;
+      background: rgba(70,243,255,0.62);
+      animation: eq .8s infinite;
+    }
+    .bars i:nth-child(2){height:26px; animation-delay:.1s; background: rgba(139,92,255,0.62)}
+    .bars i:nth-child(3){height:14px; animation-delay:.2s}
+    .bars i:nth-child(4){height:30px; animation-delay:.3s; background: rgba(255,91,214,0.52)}
+    .bars i:nth-child(5){height:20px; animation-delay:.4s}
+    @keyframes eq{0%,100%{transform:scaleY(.7);opacity:.7}50%{transform:scaleY(1.25);opacity:1}}
+
+    .arms .arm{
+      position:absolute; top:204px;
+      width:54px; height:64px; border-radius:18px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      display:flex; flex-direction:column; justify-content:center; gap:8px;
+      padding:10px;
+    }
+    .arms .left{ left:-8px; transform:rotate(-8deg); }
+    .arms .right{ right:-8px; transform:rotate(8deg); }
+    .arms b{
+      display:block; height:8px; border-radius:999px;
+      background: linear-gradient(90deg, rgba(70,243,255,0.55), rgba(139,92,255,0.45), rgba(255,91,214,0.40));
+      animation: shimmer 1.1s infinite;
+    }
+    @keyframes shimmer{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+
+    /* subtle shake on compute */
+    .shake{
+      animation: shake .45s ease-in-out;
+    }
+    @keyframes shake{
+      0%,100%{transform:translate(0,0)}
+      20%{transform:translate(-2px,1px)}
+      40%{transform:translate(3px,-2px)}
+      60%{transform:translate(-3px,2px)}
+      80%{transform:translate(2px,-1px)}
+    }
+
+    /* Light mode refinements */
+    :root[data-theme="light"] .card{
+      background: rgba(255,255,255,0.78);
+      box-shadow: 0 16px 50px rgba(7,12,24,0.18);
+    }
+    :root[data-theme="light"] .log,
+    :root[data-theme="light"] .hudConsole{
+      background: rgba(255,255,255,0.80);
+      color:#1a243a;
+      border-color: var(--line);
+    }
+    :root[data-theme="light"] .chip{
+      background: rgba(11,16,32,0.04);
+    }
+    :root[data-theme="light"] .panel::before{
+      opacity:.28;
+    }
+    :root[data-theme="light"] .hudBg{
+      background:
+        radial-gradient(1000px 700px at 20% 15%, rgba(70,243,255,0.10), transparent 60%),
+        radial-gradient(1000px 700px at 85% 25%, rgba(139,92,255,0.10), transparent 60%),
+        rgba(245,248,255,0.88);
+    }
+
+    a{color:inherit}
+  </style>
 </head>
+
 <body>
-    <div class="noise"></div>
-    <main class="app">
-        <header class="hero">
-            <div class="hero-text">
-                <p class="eyebrow">AI LOTTO STUDIO</p>
-                <h1>진짜처럼 계산하는<br>AI 로또 번호 추천</h1>
-                <p class="sub">
-                    데이터 기반 “가정”과 균형 기준을 반영해 번호를 구성합니다.
-                    실제 당첨을 보장하지 않는 시뮬레이션입니다.
-                </p>
-                <div class="hero-actions">
-                    <button class="btn primary" id="generate-btn">AI 추천 생성</button>
-                    <button class="btn ghost" id="reroll-btn">다시 계산</button>
-                </div>
-                <div class="status-line" id="status-line">
-                    대기 중 · AI 분석 준비 완료
-                </div>
-            </div>
-            <div class="hero-card">
-                <div class="card-top">
-                    <span class="chip">AI Core v3.2</span>
-                    <span class="chip soft">신뢰도 추정</span>
-                </div>
-                <div class="hero-score">
-                    <div>
-                        <p>균형 점수</p>
-                        <h2 id="balance-score">82</h2>
-                    </div>
-                    <div>
-                        <p>분산 지수</p>
-                        <h2 id="spread-score">71</h2>
-                    </div>
-                </div>
-                <div class="meter">
-                    <div class="meter-fill" id="confidence-bar"></div>
-                </div>
-                <p class="meter-label" id="confidence-label">AI 신뢰도 74%</p>
-            </div>
-        </header>
+<canvas id="bgFx"></canvas>
 
-        <section class="panel">
-            <div class="panel-header">
-                <h2>AI 추천 번호</h2>
-                <p class="meta">매회 3개의 조합을 제공합니다.</p>
-            </div>
-            <div class="cards" id="recommendations"></div>
-        </section>
+<div class="wrap">
+  <div class="top">
+    <div class="panel">
+      <div class="panelHead">
+        <div class="brandRow">
+          <span class="badge"><span class="dot"></span><span class="mono">LOTTOCORE v1.0</span></span>
+          <span class="badge"><span class="mono">AUTO-LATEST via PROXY</span></span>
+          <button id="themeToggle" class="pill themeBtn" type="button" aria-pressed="false">테마 전환</button>
+        </div>
+        <h1>🤖 LottoMind-AI · 미래형 로또 분석 & 생성 시스템</h1>
+        <p class="desc">
+          동행복권 JSON을 <b>자동 수집(최신 회차 포함)</b> → <b>Hot/Cold/Overdue</b> + <b>연속/구간 패턴</b> 분석 →
+          버튼을 누르면 <b>로봇 HUD가 폭발적으로 계산</b>하고 <b>1~5줄 번호</b>를 전송합니다.
+          <br><span class="mono muted">※ 프록시 URL만 세팅하면 CSV 없이 바로 동작</span>
+        </p>
+        <div class="kpiRow" id="kpiRow"></div>
+      </div>
 
-        <section class="panel">
-            <div class="panel-header">
-                <h2>AI 분석 리포트</h2>
-                <p class="meta">가상의 지표로 번호의 균형을 설명합니다.</p>
-            </div>
-            <div class="report-grid">
-                <div class="report-card">
-                    <h3>홀짝 밸런스</h3>
-                    <p id="odd-even">-</p>
-                </div>
-                <div class="report-card">
-                    <h3>저/고 분포</h3>
-                    <p id="low-high">-</p>
-                </div>
-                <div class="report-card">
-                    <h3>합계 범위</h3>
-                    <p id="sum-range">-</p>
-                </div>
-                <div class="report-card">
-                    <h3>패턴 다양성</h3>
-                    <p id="pattern-score">-</p>
-                </div>
-            </div>
-        </section>
+      <div class="controls">
+        <div class="pill">
+          <span class="mono">PROXY</span>
+          <input id="proxyUrl" class="mono" style="width:min(520px, 62vw);background:transparent;border:0;color:var(--fg);outline:none"
+                 placeholder="https://<YOUR-WORKER>.workers.dev"
+                 value="">
+        </div>
 
-        <section class="panel">
-            <div class="panel-header">
-                <h2>AI 생성 로그</h2>
-                <p class="meta">분석 과정을 실시간처럼 연출합니다.</p>
-            </div>
-            <div class="log" id="log"></div>
-        </section>
-    </main>
+        <div class="pill">
+          <span class="mono">LOAD</span>
+          <span class="muted">최근</span>
+          <select id="loadCount">
+            <option value="50">50회</option>
+            <option value="100" selected>100회</option>
+            <option value="200">200회</option>
+            <option value="400">400회</option>
+            <option value="800">800회</option>
+            <option value="all">전체(느릴 수 있음)</option>
+          </select>
+        </div>
 
-    <script src="main.js"></script>
+        <button id="btnFetch" class="megaBtn" type="button">
+          INITIATE LOTTO CORE
+          <span class="sub">최신 회차 자동 수집 → 분석 준비</span>
+        </button>
+
+        <div class="pill">
+          <span class="muted">생성 줄 수</span>
+          <select id="lineCount">
+            <option value="1">1줄</option>
+            <option value="2">2줄</option>
+            <option value="3">3줄</option>
+            <option value="4">4줄</option>
+            <option value="5" selected>5줄</option>
+          </select>
+        </div>
+
+        <button id="btnGenerate" class="megaBtn" type="button" disabled>
+          RELEASE ENERGY BURST
+          <span class="sub">로봇 HUD 계산 후 추천 번호 출력</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel" style="max-width:420px;min-width:320px;">
+      <div class="panelHead">
+        <div class="brandRow">
+          <span class="badge"><span class="dot"></span><span class="mono">ROBOT LOG</span></span>
+        </div>
+        <h1 style="margin-top:10px;">🧠 실시간 계산 로그</h1>
+        <p class="desc">수집/분석/샘플링 단계가 로봇 콘솔로 출력됩니다.</p>
+      </div>
+      <div class="controls" style="padding-top:0;">
+        <div id="log" class="log mono"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card c6">
+      <h2>🔥 HOT (많이 나온 TOP 10)</h2>
+      <div id="hot" class="chips"></div>
+    </div>
+
+    <div class="card c6">
+      <h2>🧊 COLD (적게 나온 TOP 10)</h2>
+      <div id="cold" class="chips"></div>
+    </div>
+
+    <div class="card c6">
+      <h2>⏳ OVERDUE (오래 안 나온 TOP 10)</h2>
+      <div id="overdue" class="chips"></div>
+    </div>
+
+    <div class="card c6">
+      <h2>📊 패턴 분석 (연속번호 / 구간)</h2>
+      <div id="pattern" class="chips"></div>
+    </div>
+
+    <div class="card c6">
+      <h2>⚙️ AI 추천 조합 (가중치 샘플링)</h2>
+      <div id="reco" class="muted">먼저 <b>INITIATE LOTTO CORE</b>로 데이터를 불러오세요.</div>
+    </div>
+
+    <div class="card c6">
+      <h2>🧪 원본 데이터 상태</h2>
+      <div id="status" class="chips"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud" class="hud hidden" aria-hidden="true">
+  <div class="hudBg"></div>
+  <div class="hudFrame" id="hudFrame">
+    <div class="hudTop">
+      <div class="hudTitle">
+        <span class="dot"></span>
+        <span class="mono">LOTTO COMPUTE SEQUENCE</span>
+      </div>
+      <button class="hudClose" id="hudClose">✕</button>
+    </div>
+
+    <div class="hudBody">
+      <div class="hudLeft">
+        <div class="robot">
+          <div class="antenna"></div>
+          <div class="head">
+            <div class="visor"><div class="scanline"></div></div>
+            <div class="eyes"><span></span><span></span><span></span></div>
+          </div>
+          <div class="neck"></div>
+          <div class="torso">
+            <div class="core"></div>
+            <div class="bars"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="arms">
+            <div class="arm left"><b></b><b></b><b></b></div>
+            <div class="arm right"><b></b><b></b><b></b></div>
+          </div>
+        </div>
+
+        <div class="hudMeter">
+          <div class="meterLabel mono">
+            <span>PROCESS</span>
+            <span id="hudPct">0%</span>
+          </div>
+          <div class="meterTrack"><div id="hudBar" class="meterBar"></div></div>
+          <div class="meterSub mono" id="hudStep">BOOTING…</div>
+        </div>
+      </div>
+
+      <div class="hudRight">
+        <div class="hudConsole mono" id="hudConsole"></div>
+        <div class="hudMini">
+          <div class="miniCard">
+            <div class="miniTitle mono">SIGNAL</div>
+            <div class="miniValue" id="sig">—</div>
+          </div>
+          <div class="miniCard">
+            <div class="miniTitle mono">SEED</div>
+            <div class="miniValue" id="seed">—</div>
+          </div>
+          <div class="miniCard">
+            <div class="miniTitle mono">MODE</div>
+            <div class="miniValue">WEIGHTED</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hudBottom mono">
+      <span class="glow">SCANNING PROBABILITY FIELD…</span>
+      <span id="hudHint">에너지를 응축 중…</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ===== Config =====
+  // 동행복권 JSON endpoint (proxy가 대신 호출)
+  // https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=회차
+  const LOTTO_API_PATH = "/lotto?drwNo="; // proxy endpoint
+
+  const ROBOT = "LottoMind-AI";
+  const $ = (id) => document.getElementById(id);
+
+  const logEl = $("log");
+  const hotEl = $("hot");
+  const coldEl = $("cold");
+  const overdueEl = $("overdue");
+  const patternEl = $("pattern");
+  const recoEl = $("reco");
+  const statusEl = $("status");
+  const kpiRow = $("kpiRow");
+
+  const proxyUrlEl = $("proxyUrl");
+  const loadCountEl = $("loadCount");
+  const btnFetch = $("btnFetch");
+  const btnGenerate = $("btnGenerate");
+  const lineCountEl = $("lineCount");
+  const themeToggle = $("themeToggle");
+
+  // HUD
+  const hud = $("hud");
+  const hudClose = $("hudClose");
+  const hudBar = $("hudBar");
+  const hudPct = $("hudPct");
+  const hudStep = $("hudStep");
+  const hudConsole = $("hudConsole");
+  const sigEl = $("sig");
+  const seedEl = $("seed");
+  const hudFrame = $("hudFrame");
+
+  let dataCache = [];       // [{round, nums}]
+  let weightsCache = null;  // 1..45 weights
+  let latestRoundCache = null;
+
+  // ===== Theme =====
+  const themeKey = "lottoTheme";
+  function applyTheme(theme){
+    const next = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    themeToggle.textContent = next === "light" ? "다크 모드" : "화이트 모드";
+    themeToggle.setAttribute("aria-pressed", next === "light");
+    localStorage.setItem(themeKey, next);
+  }
+  function initTheme(){
+    const saved = localStorage.getItem(themeKey);
+    const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)");
+    const initial = saved || (prefersLight && prefersLight.matches ? "light" : "dark");
+    applyTheme(initial);
+  }
+
+  // ===== Utilities =====
+  const robot = (msg) => {
+    const t = new Date().toLocaleTimeString();
+    logEl.textContent += `[${ROBOT} ${t}] ${msg}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  };
+
+  const chip = (title, value) => {
+    const div = document.createElement("div");
+    div.className = "chip";
+    div.innerHTML = `<b>${title}</b> <span class="muted">${value}</span>`;
+    return div;
+  };
+
+  const balls = (nums) => {
+    const wrap = document.createElement("div");
+    wrap.className = "nums";
+    nums.forEach(n => {
+      const b = document.createElement("div");
+      b.className = "ball";
+      b.textContent = n;
+      wrap.appendChild(b);
+    });
+    return wrap;
+  };
+
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  function clearUI(full=true){
+    hotEl.innerHTML = "";
+    coldEl.innerHTML = "";
+    overdueEl.innerHTML = "";
+    patternEl.innerHTML = "";
+    statusEl.innerHTML = "";
+    kpiRow.innerHTML = "";
+    if (full) {
+      recoEl.innerHTML = `<div class="muted">먼저 <b>INITIATE LOTTO CORE</b>로 데이터를 불러오세요.</div>`;
+      logEl.textContent = "";
+    }
+  }
+
+  // ===== Button sparks (energy burst) =====
+  function spawnSparks(btn, count=18){
+    const rect = btn.getBoundingClientRect();
+    for (let i=0;i<count;i++){
+      const s = document.createElement("div");
+      s.className = "spark";
+      const x = Math.random() * rect.width;
+      const y = Math.random() * rect.height;
+      const dx = (Math.random() - 0.5) * 240;
+      const dy = (Math.random() - 0.5) * 200;
+      s.style.left = x + "px";
+      s.style.top = y + "px";
+      s.style.setProperty("--dx", dx + "px");
+      s.style.setProperty("--dy", dy + "px");
+      btn.appendChild(s);
+      setTimeout(()=>s.remove(), 800);
+    }
+  }
+
+  // ===== Background FX (stars/particles) =====
+  const canvas = $("bgFx");
+  const ctx = canvas.getContext("2d");
+  let W=0,H=0, stars=[];
+  function resize(){
+    W = canvas.width = Math.floor(window.innerWidth * devicePixelRatio);
+    H = canvas.height = Math.floor(window.innerHeight * devicePixelRatio);
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    stars = Array.from({length: 140}, () => ({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      z: 0.4 + Math.random()*1.2,
+      r: (0.8 + Math.random()*1.6) * devicePixelRatio
+    }));
+  }
+  window.addEventListener("resize", resize);
+  resize();
+  function drawBg(){
+    ctx.clearRect(0,0,W,H);
+    // soft fog
+    const g = ctx.createRadialGradient(W*0.2,H*0.1, 0, W*0.2,H*0.1, Math.max(W,H)*0.7);
+    g.addColorStop(0, "rgba(70,243,255,0.08)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+
+    for (const s of stars){
+      s.x -= 0.10 * s.z * devicePixelRatio;
+      if (s.x < -20) s.x = W + 20, s.y = Math.random()*H;
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(210,230,255,${0.25 + 0.35*(s.z/1.6)})`;
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    requestAnimationFrame(drawBg);
+  }
+  drawBg();
+
+  // ===== Lotto fetch via proxy =====
+  function requireProxy(){
+    const p = proxyUrlEl.value.trim();
+    if (!p) throw new Error("PROXY URL이 비어있습니다. 먼저 프록시(Worker) URL을 넣어주세요.");
+    return p.replace(/\/+$/,""); // trim trailing slash
+  }
+
+  async function fetchDrawJSON(drwNo){
+    const proxy = requireProxy();
+    const url = proxy + LOTTO_API_PATH + encodeURIComponent(String(drwNo));
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`프록시 응답 오류: HTTP ${res.status}`);
+    return await res.json();
+  }
+
+  // 최신 회차 찾기: 증가 탐색 + 이진 탐색
+  async function findLatestRound(){
+    robot("최신 회차 탐색 시작…");
+    let n = 1;
+    // 1) 거칠게 증가
+    while (true){
+      const j = await fetchDrawJSON(n);
+      if (j && j.returnValue === "success") {
+        n *= 2;
+        if (n > 5000) break;
+      } else {
+        break;
+      }
+      await sleep(30);
+    }
+    let hi = n;
+    let lo = Math.floor(n/2);
+    robot(`범위 확정: ${lo} ~ ${hi}`);
+
+    // 2) 이진 탐색
+    while (lo + 1 < hi){
+      const mid = Math.floor((lo+hi)/2);
+      const j = await fetchDrawJSON(mid);
+      if (j && j.returnValue === "success") lo = mid;
+      else hi = mid;
+      await sleep(25);
+    }
+    robot(`최신 회차 = ${lo}`);
+    return lo;
+  }
+
+  async function loadRounds(latest, countMode){
+    robot("회차 데이터 수집 시작…");
+    let from = 1;
+    if (countMode !== "all"){
+      const k = Number(countMode);
+      from = Math.max(1, latest - k + 1);
+    }
+    robot(`수집 범위: ${from} ~ ${latest}`);
+    const arr = [];
+    for (let r=from; r<=latest; r++){
+      const j = await fetchDrawJSON(r);
+      if (j && j.returnValue === "success"){
+        const nums = [j.drwtNo1,j.drwtNo2,j.drwtNo3,j.drwtNo4,j.drwtNo5,j.drwtNo6].map(Number).sort((a,b)=>a-b);
+        arr.push({ round: Number(j.drwNo), nums });
+      }
+      if ((r-from) % 20 === 0) robot(`수집 진행… ${r}/${latest}`);
+      await sleep(20);
+    }
+    return arr;
+  }
+
+  // ===== Analysis =====
+  function freqAnalysis(data){
+    const freq = Array(46).fill(0);
+    for (const d of data) for (const n of d.nums) freq[n] += 1;
+    return freq;
+  }
+  function overdueAnalysis(data){
+    const latest = data[data.length-1]?.round ?? 0;
+    const lastSeen = Array(46).fill(null);
+    for (const d of data) for (const n of d.nums) lastSeen[n] = d.round;
+    const overdue = Array(46).fill(0);
+    for (let n=1;n<=45;n++){
+      overdue[n] = (lastSeen[n]==null) ? Infinity : (latest - lastSeen[n]);
+    }
+    return { overdue, latest };
+  }
+  function minmaxNormalize(arr, start=1, end=45){
+    let mn=Infinity, mx=-Infinity;
+    for (let i=start;i<=end;i++){
+      if (!Number.isFinite(arr[i])) continue;
+      mn=Math.min(mn,arr[i]); mx=Math.max(mx,arr[i]);
+    }
+    const out=Array(arr.length).fill(0);
+    for (let i=start;i<=end;i++){
+      if (!Number.isFinite(arr[i])) { out[i]=0; continue; }
+      out[i]=(arr[i]-mn)/((mx-mn)+1e-9);
+    }
+    return out;
+  }
+  function buildWeights(freq, overdue, wFreq=0.55, wOver=0.45){
+    const f=minmaxNormalize(freq);
+    const o=minmaxNormalize(overdue);
+    const w=Array(46).fill(0);
+    for (let n=1;n<=45;n++){
+      w[n]=wFreq*f[n]+wOver*o[n];
+      w[n]=Math.max(w[n], 0.02);
+    }
+    return w;
+  }
+  function weightedSampleUnique(weights, k=6){
+    const chosen=new Set();
+    while (chosen.size<k){
+      let sum=0;
+      for (let i=1;i<=45;i++) sum += (chosen.has(i)?0:weights[i]);
+      let r=Math.random()*sum;
+      let pick=1;
+      for (let i=1;i<=45;i++){
+        if (chosen.has(i)) continue;
+        r -= weights[i];
+        if (r<=0){ pick=i; break; }
+      }
+      chosen.add(pick);
+    }
+    return Array.from(chosen).sort((a,b)=>a-b);
+  }
+
+  // Pattern analysis (연속/구간)
+  function consecutiveInfo(numsSorted){
+    let streaks=[],cur=1;
+    for (let i=1;i<numsSorted.length;i++){
+      if (numsSorted[i]===numsSorted[i-1]+1) cur++;
+      else { streaks.push(cur); cur=1; }
+    }
+    streaks.push(cur);
+    const longest=Math.max(...streaks);
+    const hasConsecutive=streaks.some(s=>s>=2);
+    const groups=streaks.filter(s=>s>=2).length;
+    return {hasConsecutive,longest,groups};
+  }
+  function rangeBucket(n){
+    if (n<=10) return "1-10";
+    if (n<=20) return "11-20";
+    if (n<=30) return "21-30";
+    if (n<=40) return "31-40";
+    return "41-45";
+  }
+  function patternAnalysis(data){
+    let drawsWithConsecutive=0;
+    const longestStreakDist={};
+    let maxLongest=1;
+    const bucketCount={"1-10":0,"11-20":0,"21-30":0,"31-40":0,"41-45":0};
+    const perDrawBucketPattern=new Map();
+
+    for (const d of data){
+      const nums=[...d.nums].sort((a,b)=>a-b);
+      const ci=consecutiveInfo(nums);
+      if (ci.hasConsecutive) drawsWithConsecutive++;
+      maxLongest=Math.max(maxLongest,ci.longest);
+      longestStreakDist[ci.longest]=(longestStreakDist[ci.longest]||0)+1;
+
+      const buckets={"1-10":0,"11-20":0,"21-30":0,"31-40":0,"41-45":0};
+      for (const n of nums){
+        const b=rangeBucket(n);
+        bucketCount[b]+=1;
+        buckets[b]+=1;
+      }
+      const pattern = Object.values(buckets).filter(v=>v>0).sort((a,b)=>b-a).join("-");
+      perDrawBucketPattern.set(pattern, (perDrawBucketPattern.get(pattern)||0)+1);
+    }
+
+    const totalDraws=data.length;
+    const consecutiveRate=(drawsWithConsecutive/totalDraws)*100;
+    const topBucketPatterns=[...perDrawBucketPattern.entries()]
+      .sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(([pattern,count])=>({pattern,count}));
+
+    return {totalDraws,drawsWithConsecutive,consecutiveRate,longestStreakDist,maxLongest,bucketCount,topBucketPatterns};
+  }
+
+  // ===== Render =====
+  function renderAll(){
+    hotEl.innerHTML=""; coldEl.innerHTML=""; overdueEl.innerHTML=""; patternEl.innerHTML=""; statusEl.innerHTML=""; kpiRow.innerHTML="";
+    const data = dataCache;
+    if (!data.length){
+      recoEl.innerHTML = `<div class="muted">데이터가 없습니다. 먼저 수집을 실행하세요.</div>`;
+      return;
+    }
+
+    // KPIs
+    const first=data[0].round, last=data[data.length-1].round;
+    const k1=document.createElement("div"); k1.className="kpi"; k1.innerHTML=`<span class="miniDot"></span><b>회차</b> <span class="muted">${first}~${last}</span>`;
+    const k2=document.createElement("div"); k2.className="kpi"; k2.innerHTML=`<span class="miniDot"></span><b>데이터</b> <span class="muted">${data.length}회</span>`;
+    const k3=document.createElement("div"); k3.className="kpi"; k3.innerHTML=`<span class="miniDot"></span><b>모드</b> <span class="muted">WEIGHTED</span>`;
+    kpiRow.append(k1,k2,k3);
+
+    // Analysis
+    const freq=freqAnalysis(data);
+    const {overdue, latest}=overdueAnalysis(data);
+    weightsCache = buildWeights(freq, overdue, 0.55, 0.45);
+
+    // HOT/COLD
+    const pairs=[];
+    for (let n=1;n<=45;n++) pairs.push([n,freq[n]]);
+    pairs.sort((a,b)=>b[1]-a[1]);
+    pairs.slice(0,10).forEach(([n,c])=>hotEl.appendChild(chip(n, `${c}회`)));
+    pairs.slice().sort((a,b)=>a[1]-b[1]).slice(0,10).forEach(([n,c])=>coldEl.appendChild(chip(n, `${c}회`)));
+
+    // Overdue
+    const od=[];
+    for (let n=1;n<=45;n++) if (Number.isFinite(overdue[n])) od.push([n,overdue[n]]);
+    od.sort((a,b)=>b[1]-a[1]);
+    od.slice(0,10).forEach(([n,d])=>overdueEl.appendChild(chip(n, `${d}회 미출현`)));
+
+    // Pattern
+    const pat=patternAnalysis(data);
+    patternEl.appendChild(chip("연속 출현", `${pat.drawsWithConsecutive}/${pat.totalDraws} (${pat.consecutiveRate.toFixed(1)}%)`));
+    patternEl.appendChild(chip("최대 연속", `${pat.maxLongest}연속`));
+    Object.entries(pat.longestStreakDist).sort((a,b)=>Number(b[0])-Number(a[0])).slice(0,3)
+      .forEach(([len,cnt])=>patternEl.appendChild(chip(`최장 ${len}연속`, `${cnt}회`)));
+
+    const totalNums=pat.totalDraws*6;
+    Object.entries(pat.bucketCount)
+      .map(([b,c])=>({b,c,p:(c/totalNums)*100}))
+      .sort((a,b)=>b.c-a.c)
+      .forEach(x=>patternEl.appendChild(chip(`구간 ${x.b}`, `${x.c}개 (${x.p.toFixed(1)}%)`)));
+    pat.topBucketPatterns.forEach(x=>patternEl.appendChild(chip(`패턴 ${x.pattern}`, `${x.count}회`)));
+
+    // Status
+    statusEl.appendChild(chip("최신 회차", latest));
+    statusEl.appendChild(chip("가중치", "READY"));
+    statusEl.appendChild(chip("데이터 소스", "dhlottery JSON via proxy"));
+
+    recoEl.innerHTML = `<div class="muted">준비 완료. <b>RELEASE ENERGY BURST</b>를 누르면 로봇이 계산합니다.</div>`;
+    btnGenerate.disabled = false;
+  }
+
+  function renderRecommendations(lines){
+    recoEl.innerHTML = "";
+    for (let i=1;i<=lines;i++){
+      const pick=weightedSampleUnique(weightsCache, 6);
+      const box=document.createElement("div");
+      box.style.marginBottom="10px";
+      box.style.borderRadius="18px";
+      box.style.border="1px solid rgba(255,255,255,0.10)";
+      box.style.background="rgba(255,255,255,0.03)";
+      box.style.padding="12px";
+      box.innerHTML = `<div class="mono muted">SET ${i} :: AI-Weighted Sampling</div>`;
+      box.appendChild(balls(pick));
+      recoEl.appendChild(box);
+    }
+  }
+
+  // ===== HUD =====
+  function hudOpen(){
+    hud.classList.remove("hidden");
+    hud.setAttribute("aria-hidden","false");
+    hudBar.style.width="0%";
+    hudPct.textContent="0%";
+    hudStep.textContent="BOOTING…";
+    hudConsole.textContent="";
+  }
+  function hudCloseNow(){
+    hud.classList.add("hidden");
+    hud.setAttribute("aria-hidden","true");
+  }
+  function hudLog(line){
+    hudConsole.textContent += line + "\n";
+    hudConsole.scrollTop = hudConsole.scrollHeight;
+  }
+  hudClose.addEventListener("click", hudCloseNow);
+  hud.addEventListener("click", (e)=>{
+    if (e.target === hud || e.target.classList.contains("hudBg")) hudCloseNow();
+  });
+
+  async function runRobotCompute(lines){
+    if (!weightsCache){
+      robot("가중치 없음. 먼저 수집/분석을 실행하세요.");
+      return;
+    }
+    const seed = Math.floor(Math.random()*1e9);
+    const sig = (Math.random()*100).toFixed(2)+"%";
+    seedEl.textContent=seed;
+    sigEl.textContent=sig;
+
+    hudOpen();
+    hudFrame.classList.add("shake");
+    setTimeout(()=>hudFrame.classList.remove("shake"), 520);
+
+    hudLog(`[${ROBOT}] CORE ONLINE`);
+    await sleep(220);
+
+    const steps=[
+      ["Locking latest draw index", 14],
+      ["Normalizing frequency vectors", 30],
+      ["Scanning overdue field", 46],
+      ["Synthesizing weight map", 62],
+      ["Monte-Carlo sampling", 80],
+      ["Compressing ticket payload", 94],
+      ["ENERGY RELEASE", 100],
+    ];
+
+    for (const [label,pct] of steps){
+      hudStep.textContent = label + "…";
+      hudLog(`[${ROBOT}] ${label} ✓`);
+      const cur = Number(hudPct.textContent.replace("%","")) || 0;
+      for (let p=cur; p<=pct; p+=2){
+        hudBar.style.width = p+"%";
+        hudPct.textContent = p+"%";
+        await sleep(14);
+      }
+      await sleep(140);
+    }
+
+    renderRecommendations(lines);
+    hudStep.textContent = "RESULT TRANSFER…";
+    hudLog(`[${ROBOT}] Ticket lines delivered.`);
+    await sleep(360);
+    hudCloseNow();
+  }
+
+  // ===== Fetch flow =====
+  async function fetchAndAnalyze(){
+    clearUI(true);
+    btnGenerate.disabled = true;
+    try{
+      robot("INITIATE LOTTO CORE…");
+      const proxy = requireProxy();
+      robot(`PROXY = ${proxy}`);
+
+      latestRoundCache = await findLatestRound();
+      const countMode = loadCountEl.value;
+      dataCache = await loadRounds(latestRoundCache, countMode);
+      robot(`수집 완료. 총 ${dataCache.length}회`);
+      robot("분석 시작…");
+      renderAll();
+      robot("READY. (이제 에너지 버튼 가능)");
+    }catch(e){
+      robot("ERROR: " + (e?.message || String(e)));
+      statusEl.appendChild(chip("상태", "실패"));
+      statusEl.appendChild(chip("원인", "프록시 URL/네트워크/CORS"));
+      btnGenerate.disabled = true;
+    }
+  }
+
+  // ===== Events =====
+  btnFetch.addEventListener("click", async ()=>{
+    spawnSparks(btnFetch, 22);
+    await fetchAndAnalyze();
+  });
+
+  btnGenerate.addEventListener("click", async ()=>{
+    spawnSparks(btnGenerate, 28);
+    const lines = Math.min(5, Math.max(1, Number(lineCountEl.value || 5)));
+    await runRobotCompute(lines);
+  });
+  themeToggle.addEventListener("click", ()=>{
+    const cur = document.documentElement.getAttribute("data-theme");
+    applyTheme(cur === "light" ? "dark" : "light");
+  });
+
+  // ===== Init message =====
+  initTheme();
+  clearUI(true);
+  robot("대기 중… 1) PROXY URL 입력  2) INITIATE LOTTO CORE 클릭");
+})();
+</script>
 </body>
 </html>
