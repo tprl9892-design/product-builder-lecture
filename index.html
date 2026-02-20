@@ -354,6 +354,12 @@
       box-shadow: 0 40px 120px rgba(0,0,0,0.65);
       overflow:hidden;
     }
+    .hudFrame.analyzing{
+      box-shadow:
+        0 40px 120px rgba(0,0,0,0.65),
+        0 0 0 1px rgba(70,243,255,0.18) inset,
+        0 0 70px rgba(70,243,255,0.18);
+    }
     .hudFrame::before{
       content:"";
       position:absolute; inset:-3px;
@@ -495,6 +501,7 @@
       background: linear-gradient(180deg, transparent, rgba(70,243,255,0.38), transparent);
       animation: scan 1.15s linear infinite;
     }
+    .hudFrame.analyzing .scanline{ animation-duration:0.75s; }
     @keyframes scan{0%{top:-28px}100%{top:88px}}
     .eyes{
       position:absolute; left:0; right:0; bottom:14px;
@@ -506,6 +513,7 @@
       box-shadow: 0 0 16px rgba(70,243,255,0.85);
       animation: blink 2.2s infinite;
     }
+    .hudFrame.analyzing .eyes span{ animation-duration:1.1s; }
     .eyes span:nth-child(2){ animation-delay:.2s; background: rgba(139,92,255,0.92); }
     .eyes span:nth-child(3){ animation-delay:.4s; background: rgba(255,91,214,0.82); }
     @keyframes blink{0%,92%,100%{transform:scale(1)}94%{transform:scale(0.25)}96%{transform:scale(1)}}
@@ -1320,19 +1328,33 @@
     try {
       // Loading HUD: advanced AI analysis
       hudOpen();
+      hudFrame.classList.add("analyzing");
       hudBar.style.width = "12%";
       hudPct.textContent = "12%";
       hudStep.textContent = "AI 로또 1등당첨 분석중…";
       hudConsole.textContent = "";
-      hudLog("[LottoMind-AI] Quantum heuristic scan booting");
-      await sleep(220);
-      hudBar.style.width = "26%";
-      hudPct.textContent = "26%";
-      hudLog("[LottoMind-AI] Historic jackpot vectors locked");
-      await sleep(220);
-      hudBar.style.width = "42%";
-      hudPct.textContent = "42%";
-      hudLog("[LottoMind-AI] Probability mesh stabilizing");
+      hudLog("[LottoMind-AI] 양자 휴리스틱 스캔 부팅");
+      await sleep(280);
+      hudBar.style.width = "24%";
+      hudPct.textContent = "24%";
+      hudLog("[LottoMind-AI] 1등 당첨 히스토리 벡터 잠금");
+      await sleep(280);
+      hudBar.style.width = "38%";
+      hudPct.textContent = "38%";
+      hudLog("[LottoMind-AI] 확률 메쉬 안정화");
+      await sleep(280);
+      hudBar.style.width = "52%";
+      hudPct.textContent = "52%";
+      hudLog("[LottoMind-AI] 패턴 왜곡 보정");
+      await sleep(280);
+      hudBar.style.width = "66%";
+      hudPct.textContent = "66%";
+      hudLog("[LottoMind-AI] 가중치 코어 합성");
+      await sleep(280);
+      hudBar.style.width = "78%";
+      hudPct.textContent = "78%";
+      hudLog("[LottoMind-AI] 조합 탐색 엔진 가열");
+      await sleep(280);
 
       let data = [];
       try {
@@ -1362,15 +1384,17 @@
 
       hudBar.style.width = "100%";
       hudPct.textContent = "100%";
-      hudStep.textContent = "ANALYSIS READY";
-      hudLog("[LottoMind-AI] Core ready");
-      await sleep(220);
+      hudStep.textContent = "분석 완료";
+      hudLog("[LottoMind-AI] 코어 준비 완료");
+      await sleep(380);
       hudCloseNow();
+      hudFrame.classList.remove("analyzing");
     } catch (err){
       const msg = err && err.message ? err.message : String(err);
       robot(`데이터 수집 실패: ${msg}`);
       recoEl.innerHTML = `<div class="muted">데이터를 불러오지 못했습니다. 새로고침 후 다시 시도하세요.</div>`;
       hudCloseNow();
+      hudFrame.classList.remove("analyzing");
     } finally {
       btnGenerate.disabled = false;
     }
