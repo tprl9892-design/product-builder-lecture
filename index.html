@@ -801,6 +801,10 @@
   // https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=회차
   const ROBOT = "LottoMind-AI";
   const HISTORY_SIZE = 200;
+  const API_BASE = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=";
+  const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+  const START_DATE = new Date("2002-12-07T20:35:00+09:00");
+  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
   const $ = (id) => document.getElementById(id);
 
   const logEl = $("log");
@@ -831,6 +835,8 @@
 
   let dataCache = [];       // [{round, nums}]
   let weightsCache = null;  // 1..45 weights
+  let useProxy = false;
+  let dataSourceLabel = "DHLottery API";
 
   // ===== Theme =====
   const themeKey = "lottoTheme";
@@ -995,23 +1001,87 @@
 
   // ===== Live data (via server proxy) =====
   async function fetchDraw(drawNo){
-    const res = await fetch(`/api/lotto?drawNo=${encodeURIComponent(drawNo)}`, { cache: "no-store" });
-    if (!res.ok){
-      let msg = "네트워크 오류";
+    if (!useProxy){
       try {
-        const err = await res.json();
-        if (err && err.error) msg = err.error;
-      } catch {}
-      throw new Error(msg);
+        const res = await fetch(`/api/lotto?drawNo=${encodeURIComponent(drawNo)}`, { cache: "no-store" });
+        if (!res.ok){
+          let msg = "네트워크 오류";
+          try {
+            const err = await res.json();
+            if (err && err.error) msg = err.error;
+          } catch {}
+          throw new Error(msg);
+        }
+        const ct = res.headers.get("content-type") || "";
+        if (!ct.includes("application/json")){
+          throw new Error("API 응답이 JSON이 아닙니다.");
+        }
+        const data = await res.json();
+        if (data && data.error) throw new Error(data.error);
+        if (data && data.returnValue && data.returnValue !== "success") throw new Error("조회 실패");
+        dataSourceLabel = "DHLottery API (Pages)";
+        return data;
+      } catch {
+        useProxy = true;
+        dataSourceLabel = "DHLottery API (proxy)";
+      }
     }
-    const ct = res.headers.get("content-type") || "";
-    if (!ct.includes("application/json")){
-      throw new Error("API 응답이 JSON이 아닙니다. /api/lotto 라우트(Functions) 배포 상태를 확인하세요.");
+    return await fetchDrawViaProxy(drawNo);
+  }
+
+  async function fetchDrawViaProxy(drawNo){
+    let target = drawNo;
+    if (drawNo === "latest"){
+      target = await findLatestDrawNoProxy();
     }
+    const url = `${API_BASE}${target}`;
+    const res = await fetch(`${CORS_PROXY}${encodeURIComponent(url)}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("프록시 네트워크 오류");
     const data = await res.json();
     if (data && data.error) throw new Error(data.error);
     if (data && data.returnValue && data.returnValue !== "success") throw new Error("조회 실패");
     return data;
+  }
+
+  async function fetchDrawSafeViaProxy(drawNo){
+    try {
+      const url = `${API_BASE}${drawNo}`;
+      const res = await fetch(`${CORS_PROXY}${encodeURIComponent(url)}`, { cache: "no-store" });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data && data.returnValue === "success" ? data : null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function findLatestDrawNoProxy(){
+    const estimate = Math.floor((Date.now() - START_DATE.getTime()) / WEEK_MS) + 1;
+    let low = Math.max(1, estimate - 8);
+    let high = estimate + 8;
+
+    for (let i = 0; i < 12; i += 1) {
+      const result = await fetchDrawSafeViaProxy(low);
+      if (result) break;
+      low = Math.max(1, low - 1);
+    }
+
+    for (let i = 0; i < 12; i += 1) {
+      const result = await fetchDrawSafeViaProxy(high);
+      if (!result) break;
+      high += 2;
+    }
+
+    let left = low;
+    let right = high;
+    for (let i = 0; i < 24; i += 1) {
+      if (left + 1 >= right) break;
+      const mid = Math.floor((left + right) / 2);
+      const result = await fetchDrawSafeViaProxy(mid);
+      if (result) left = mid;
+      else right = mid;
+    }
+    return left;
   }
 
   function drawToRecord(data){
@@ -1207,7 +1277,7 @@
     // Status
     statusEl.appendChild(chip("최신 회차", latest));
     statusEl.appendChild(chip("가중치", "READY"));
-    statusEl.appendChild(chip("데이터 소스", "DHLottery API"));
+    statusEl.appendChild(chip("데이터 소스", dataSourceLabel));
 
     recoEl.innerHTML = `<div class="muted">준비 완료. <b>RELEASE ENERGY BURST</b>를 누르면 로봇이 계산합니다.</div>`;
     btnGenerate.disabled = false;
@@ -1314,7 +1384,7 @@
     } catch (err){
       const msg = err && err.message ? err.message : String(err);
       robot(`데이터 수집 실패: ${msg}`);
-      recoEl.innerHTML = `<div class="muted">실제 로또 데이터를 불러오지 못했습니다. Cloudflare Functions의 <b>/api/lotto</b> 라우트가 동작하는지 확인하세요.</div>`;
+      recoEl.innerHTML = `<div class="muted">실제 로또 데이터를 불러오지 못했습니다. 잠시 후 다시 시도하거나 네트워크 상태를 확인하세요.</div>`;
     } finally {
       btnGenerate.disabled = false;
     }
