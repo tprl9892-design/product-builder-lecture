@@ -1222,7 +1222,8 @@
 
   // ===== Render =====
   function renderAll(){
-    hotEl.innerHTML=""; coldEl.innerHTML=""; overdueEl.innerHTML=""; patternEl.innerHTML=""; statusEl.innerHTML=""; kpiRow.innerHTML="";
+    hotEl.innerHTML=""; coldEl.innerHTML=""; overdueEl.innerHTML=""; patternEl.innerHTML=""; kpiRow.innerHTML="";
+    if (statusEl) statusEl.innerHTML="";
     const data = dataCache;
     if (!data.length){
       recoEl.innerHTML = `<div class="muted">데이터가 없습니다. 먼저 수집을 실행하세요.</div>`;
