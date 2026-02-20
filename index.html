@@ -144,6 +144,38 @@
       padding:10px 10px;
       outline:none;
     }
+    .formField{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:12px;
+    }
+    .formField label{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .formField input,
+    .formField textarea{
+      background:var(--input-bg);
+      color:var(--fg);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:12px;
+      padding:10px 12px;
+      outline:none;
+      font-size:13px;
+    }
+    .formField textarea{ min-height:110px; resize:vertical; }
+    .formBtn{
+      width:100%;
+      border:1px solid rgba(255,255,255,0.16);
+      border-radius:12px;
+      padding:12px 14px;
+      color:var(--fg);
+      background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02));
+      cursor:pointer;
+      font-weight:700;
+    }
+    .formBtn:hover{ filter:brightness(1.05); }
 
     /* ===== MEGA BUTTON (energy burst) ===== */
     .megaBtn{
@@ -635,6 +667,25 @@
     <div class="card c6">
       <h2>🧪 원본 데이터 상태</h2>
       <div id="status" class="chips"></div>
+    </div>
+
+    <div class="card c6">
+      <h2>✉️ 문의 / 피드백</h2>
+      <form action="https://formspree.io/f/maqddppl" method="POST">
+        <div class="formField">
+          <label for="formName">이름</label>
+          <input id="formName" name="name" type="text" placeholder="이름을 입력하세요" required>
+        </div>
+        <div class="formField">
+          <label for="formEmail">이메일</label>
+          <input id="formEmail" name="email" type="email" placeholder="답변 받을 이메일" required>
+        </div>
+        <div class="formField">
+          <label for="formMessage">메시지</label>
+          <textarea id="formMessage" name="message" placeholder="문의 내용을 적어주세요" required></textarea>
+        </div>
+        <button class="formBtn" type="submit">전송하기</button>
+      </form>
     </div>
   </div>
 </div>
