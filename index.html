@@ -1320,8 +1320,15 @@
 
   async function runRobotCompute(lines){
     if (!weightsCache){
-      robot("가중치 없음. 먼저 수집/분석을 실행하세요.");
-      return;
+      if (dataCache && dataCache.length){
+        const freq=freqAnalysis(dataCache);
+        const {overdue}=overdueAnalysis(dataCache);
+        weightsCache = buildWeights(freq, overdue, 0.55, 0.45);
+        robot("가중치 재계산 완료. 추천 조합 생성 중…");
+      } else {
+        robot("데이터 없음. 먼저 수집/분석을 실행하세요.");
+        return;
+      }
     }
     const seed = Math.floor(Math.random()*1e9);
     const sig = (Math.random()*100).toFixed(2)+"%";
@@ -1336,13 +1343,13 @@
     await sleep(220);
 
     const steps=[
-      ["Locking latest draw index", 14],
-      ["Normalizing frequency vectors", 30],
-      ["Scanning overdue field", 46],
-      ["Synthesizing weight map", 62],
-      ["Monte-Carlo sampling", 80],
-      ["Compressing ticket payload", 94],
-      ["ENERGY RELEASE", 100],
+      ["최신 회차 인덱스 고정", 14],
+      ["빈도 벡터 정규화", 30],
+      ["미출현 필드 스캔", 46],
+      ["가중치 맵 합성", 62],
+      ["몬테카를로 샘플링", 80],
+      ["티켓 페이로드 압축", 94],
+      ["에너지 방출", 100],
     ];
 
     for (const [label,pct] of steps){
@@ -1358,6 +1365,7 @@
     }
 
     renderRecommendations(lines);
+    robot("추천 번호 생성 완료.");
     hudStep.textContent = "RESULT TRANSFER…";
     hudLog(`[${ROBOT}] Ticket lines delivered.`);
     await sleep(360);
