@@ -1318,6 +1318,22 @@
     btnGenerate.disabled = true;
     robot("AI 코어 부팅…");
     try {
+      // Loading HUD: advanced AI analysis
+      hudOpen();
+      hudBar.style.width = "12%";
+      hudPct.textContent = "12%";
+      hudStep.textContent = "AI 로또 1등당첨 분석중…";
+      hudConsole.textContent = "";
+      hudLog("[LottoMind-AI] Quantum heuristic scan booting");
+      await sleep(220);
+      hudBar.style.width = "26%";
+      hudPct.textContent = "26%";
+      hudLog("[LottoMind-AI] Historic jackpot vectors locked");
+      await sleep(220);
+      hudBar.style.width = "42%";
+      hudPct.textContent = "42%";
+      hudLog("[LottoMind-AI] Probability mesh stabilizing");
+
       let data = [];
       try {
         const snap = await loadSnapshot();
@@ -1343,10 +1359,18 @@
       dataCache = data;
       robot("분석 준비 완료.");
       renderAll();
+
+      hudBar.style.width = "100%";
+      hudPct.textContent = "100%";
+      hudStep.textContent = "ANALYSIS READY";
+      hudLog("[LottoMind-AI] Core ready");
+      await sleep(220);
+      hudCloseNow();
     } catch (err){
       const msg = err && err.message ? err.message : String(err);
       robot(`데이터 수집 실패: ${msg}`);
       recoEl.innerHTML = `<div class="muted">데이터를 불러오지 못했습니다. 새로고침 후 다시 시도하세요.</div>`;
+      hudCloseNow();
     } finally {
       btnGenerate.disabled = false;
     }
