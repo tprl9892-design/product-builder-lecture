@@ -698,6 +698,11 @@
             <option value="3">3줄</option>
             <option value="4">4줄</option>
             <option value="5" selected>5줄</option>
+            <option value="6">6줄</option>
+            <option value="7">7줄</option>
+            <option value="8">8줄</option>
+            <option value="9">9줄</option>
+            <option value="10">10줄</option>
           </select>
         </div>
 
@@ -1471,7 +1476,7 @@
   // ===== Events =====
   btnGenerate.addEventListener("click", async ()=>{
     spawnSparks(btnGenerate, 28);
-    const lines = Math.min(5, Math.max(1, Number(lineCountEl.value || 5)));
+    const lines = Math.min(10, Math.max(1, Number(lineCountEl.value || 10)));
     await prepareAnalysis();
     await runRobotCompute(lines);
   });
