@@ -820,7 +820,7 @@
     },
     {
       name: "jina.ai",
-      build: (url) => `https://r.jina.ai/http://${url.replace(/^https?:\\/\\//, "")}`,
+      build: (url) => `https://r.jina.ai/http://${url.replace("https://", "").replace("http://", "")}`,
       parse: async (res) => JSON.parse(await res.text()),
     },
     {
