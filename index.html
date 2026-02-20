@@ -979,7 +979,7 @@
     coldEl.innerHTML = "";
     overdueEl.innerHTML = "";
     patternEl.innerHTML = "";
-    statusEl.innerHTML = "";
+    if (statusEl) statusEl.innerHTML = "";
     kpiRow.innerHTML = "";
     if (full) {
       recoEl.innerHTML = `<div class="muted">먼저 <b>INITIATE LOTTO CORE</b>로 데이터를 불러오세요.</div>`;
@@ -1267,11 +1267,13 @@
     pat.topBucketPatterns.forEach(x=>patternEl.appendChild(chip(`패턴 ${x.pattern}`, `${x.count}회`)));
 
     // Status
-    statusEl.appendChild(chip("최신 회차", latest));
-    statusEl.appendChild(chip("가중치", "READY"));
-    statusEl.appendChild(chip("데이터 소스", dataSourceLabel));
-    if (snapshotMeta?.updatedAt){
-      statusEl.appendChild(chip("스냅샷 시각", new Date(snapshotMeta.updatedAt).toLocaleDateString()));
+    if (statusEl){
+      statusEl.appendChild(chip("최신 회차", latest));
+      statusEl.appendChild(chip("가중치", "READY"));
+      statusEl.appendChild(chip("데이터 소스", dataSourceLabel));
+      if (snapshotMeta?.updatedAt){
+        statusEl.appendChild(chip("스냅샷 시각", new Date(snapshotMeta.updatedAt).toLocaleDateString()));
+      }
     }
 
     recoEl.innerHTML = `<div class="muted">준비 완료. <b>RELEASE ENERGY BURST</b>를 누르면 로봇이 계산합니다.</div>`;
