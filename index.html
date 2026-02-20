@@ -176,6 +176,26 @@
       font-weight:700;
     }
     .formBtn:hover{ filter:brightness(1.05); }
+    .commentList{
+      margin-top:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .commentItem{
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:12px;
+      padding:10px 12px;
+      background:rgba(255,255,255,0.03);
+    }
+    .commentMeta{
+      display:flex;
+      justify-content:space-between;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    .commentBody{ font-size:13px; color:var(--fg); line-height:1.4; }
 
     /* ===== MEGA BUTTON (energy burst) ===== */
     .megaBtn{
@@ -687,6 +707,23 @@
         <button class="formBtn" type="submit">전송하기</button>
       </form>
     </div>
+
+    <div class="card c6">
+      <h2>💬 댓글 남기기</h2>
+      <form id="commentForm" action="https://formspree.io/f/maqddppl" method="POST">
+        <div class="formField">
+          <label for="commentName">닉네임</label>
+          <input id="commentName" name="comment_name" type="text" placeholder="닉네임을 입력하세요" required>
+        </div>
+        <div class="formField">
+          <label for="commentBody">댓글</label>
+          <textarea id="commentBody" name="comment_body" placeholder="댓글을 입력하세요" required></textarea>
+        </div>
+        <button class="formBtn" type="submit">댓글 전송</button>
+      </form>
+      <div class="muted" style="margin-top:8px;">작성한 댓글은 이 브라우저에만 저장됩니다.</div>
+      <div id="commentList" class="commentList"></div>
+    </div>
   </div>
 </div>
 
@@ -774,6 +811,8 @@
   const recoEl = $("reco");
   const statusEl = $("status");
   const kpiRow = $("kpiRow");
+  const commentForm = $("commentForm");
+  const commentList = $("commentList");
 
   const btnGenerate = $("btnGenerate");
   const lineCountEl = $("lineCount");
@@ -795,6 +834,7 @@
 
   // ===== Theme =====
   const themeKey = "lottoTheme";
+  const commentKey = "lottoComments";
   function applyTheme(theme){
     const next = theme === "light" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
@@ -807,6 +847,51 @@
     const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)");
     const initial = saved || (prefersLight && prefersLight.matches ? "light" : "dark");
     applyTheme(initial);
+  }
+  function loadComments(){
+    try {
+      const raw = localStorage.getItem(commentKey);
+      const arr = JSON.parse(raw || "[]");
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  }
+  function saveComments(arr){
+    const trimmed = arr.slice(-200);
+    localStorage.setItem(commentKey, JSON.stringify(trimmed));
+  }
+  function renderComments(){
+    if (!commentList) return;
+    const items = loadComments();
+    commentList.innerHTML = "";
+    if (!items.length){
+      const empty = document.createElement("div");
+      empty.className = "muted";
+      empty.textContent = "아직 댓글이 없습니다.";
+      commentList.appendChild(empty);
+      return;
+    }
+    items.slice().reverse().forEach((it) => {
+      const wrap = document.createElement("div");
+      wrap.className = "commentItem";
+
+      const meta = document.createElement("div");
+      meta.className = "commentMeta";
+      const name = document.createElement("span");
+      name.textContent = it.name || "익명";
+      const time = document.createElement("span");
+      const d = new Date(it.ts);
+      time.textContent = isNaN(d.getTime()) ? "" : d.toLocaleString();
+      meta.append(name, time);
+
+      const body = document.createElement("div");
+      body.className = "commentBody";
+      body.textContent = it.body || "";
+
+      wrap.append(meta, body);
+      commentList.appendChild(wrap);
+    });
   }
 
   // ===== Utilities =====
@@ -918,6 +1003,10 @@
         if (err && err.error) msg = err.error;
       } catch {}
       throw new Error(msg);
+    }
+    const ct = res.headers.get("content-type") || "";
+    if (!ct.includes("application/json")){
+      throw new Error("API 응답이 JSON이 아닙니다. /api/lotto 라우트(Functions) 배포 상태를 확인하세요.");
     }
     const data = await res.json();
     if (data && data.error) throw new Error(data.error);
@@ -1225,7 +1314,7 @@
     } catch (err){
       const msg = err && err.message ? err.message : String(err);
       robot(`데이터 수집 실패: ${msg}`);
-      recoEl.innerHTML = `<div class="muted">실제 로또 데이터를 불러오지 못했습니다. 서버가 실행 중인지 확인하세요.</div>`;
+      recoEl.innerHTML = `<div class="muted">실제 로또 데이터를 불러오지 못했습니다. Cloudflare Functions의 <b>/api/lotto</b> 라우트가 동작하는지 확인하세요.</div>`;
     } finally {
       btnGenerate.disabled = false;
     }
@@ -1242,11 +1331,32 @@
     const cur = document.documentElement.getAttribute("data-theme");
     applyTheme(cur === "light" ? "dark" : "light");
   });
+  if (commentForm){
+    commentForm.addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const name = $("commentName")?.value?.trim() || "익명";
+      const body = $("commentBody")?.value?.trim();
+      if (!body) return;
+      const entry = { name, body, ts: new Date().toISOString() };
+      const items = loadComments();
+      items.push(entry);
+      saveComments(items);
+      renderComments();
+      commentForm.reset();
+
+      const fd = new FormData(commentForm);
+      fd.append("comment_ts", entry.ts);
+      try {
+        await fetch(commentForm.action, { method: "POST", body: fd, headers: { "Accept": "application/json" } });
+      } catch {}
+    });
+  }
 
   // ===== Init message =====
   initTheme();
   clearUI(true);
   robot("대기 중… 1) RUN AI ANALYSIS 클릭");
+  renderComments();
 })();
 </script>
 </body>
