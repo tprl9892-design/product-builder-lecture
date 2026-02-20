@@ -158,8 +158,22 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap:16px;
     }
+    .formGrid.formSplit > div{
+      padding:0 8px;
+    }
+    .formGrid.formSplit > div:first-child{
+      border-right:1px solid rgba(255,255,255,0.12);
+      padding-right:16px;
+    }
+    :root[data-theme="light"] .formGrid.formSplit > div:first-child{
+      border-right-color: rgba(11,16,32,0.15);
+    }
     @media (max-width:900px){
       .formGrid{ grid-template-columns:1fr; }
+      .formGrid.formSplit > div{
+        padding:0;
+        border-right:0;
+      }
     }
     .formField{
       display:flex;
@@ -199,6 +213,11 @@
       flex-direction:column;
       gap:10px;
     }
+    .commentActions{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:10px;
+    }
     .commentItem{
       border:1px solid rgba(255,255,255,0.10);
       border-radius:12px;
@@ -213,6 +232,16 @@
       margin-bottom:6px;
     }
     .commentBody{ font-size:13px; color:var(--fg); line-height:1.4; }
+    .commentDelete{
+      border:1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color:var(--fg);
+      border-radius:10px;
+      padding:6px 10px;
+      font-size:12px;
+      cursor:pointer;
+    }
+    .commentDelete:hover{ filter:brightness(1.05); }
 
     /* ===== MEGA BUTTON (energy burst) ===== */
     .megaBtn{
@@ -758,7 +787,7 @@
 
     <div class="card c12">
       <h2>✉️ 문의 / 피드백 · 💬 댓글 남기기</h2>
-      <div class="formGrid">
+      <div class="formGrid formSplit">
         <div>
           <div class="muted" style="margin-bottom:8px;">문의 / 피드백</div>
           <form action="https://formspree.io/f/maqddppl" method="POST">
@@ -791,6 +820,9 @@
             <button class="formBtn" type="submit">댓글 전송</button>
           </form>
           <div class="muted" style="margin-top:8px;">작성한 댓글은 이 브라우저에만 저장됩니다.</div>
+          <div class="commentActions">
+            <button id="commentClearAll" class="commentDelete" type="button">댓글 전체 삭제</button>
+          </div>
           <div id="commentList" class="commentList"></div>
         </div>
       </div>
@@ -885,6 +917,7 @@
   const kpiRow = $("kpiRow");
   const commentForm = $("commentForm");
   const commentList = $("commentList");
+  const commentClearAll = $("commentClearAll");
 
   const btnGenerate = $("btnGenerate");
   const lineCountEl = $("lineCount");
@@ -947,6 +980,7 @@
       return;
     }
     items.slice().reverse().forEach((it) => {
+      const index = items.indexOf(it);
       const wrap = document.createElement("div");
       wrap.className = "commentItem";
 
@@ -963,7 +997,18 @@
       body.className = "commentBody";
       body.textContent = it.body || "";
 
-      wrap.append(meta, body);
+      const del = document.createElement("button");
+      del.className = "commentDelete";
+      del.type = "button";
+      del.textContent = "삭제";
+      del.addEventListener("click", () => {
+        const current = loadComments();
+        current.splice(index, 1);
+        saveComments(current);
+        renderComments();
+      });
+
+      wrap.append(meta, body, del);
       commentList.appendChild(wrap);
     });
   }
@@ -1505,6 +1550,12 @@
       try {
         await fetch(commentForm.action, { method: "POST", body: fd, headers: { "Accept": "application/json" } });
       } catch {}
+    });
+  }
+  if (commentClearAll){
+    commentClearAll.addEventListener("click", () => {
+      saveComments([]);
+      renderComments();
     });
   }
 
