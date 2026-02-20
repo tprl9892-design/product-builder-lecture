@@ -150,6 +150,14 @@
       padding:10px 10px;
       outline:none;
     }
+    .formGrid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:16px;
+    }
+    @media (max-width:900px){
+      .formGrid{ grid-template-columns:1fr; }
+    }
     .formField{
       display:flex;
       flex-direction:column;
@@ -303,6 +311,9 @@
       font-size:12px;
       box-shadow: 0 0 0 1px rgba(70,243,255,0.06) inset;
     }
+    .recoBox{
+      text-align:center;
+    }
     .muted{color:var(--muted);font-size:13px}
     .log{
       height:210px; overflow:auto; white-space:pre-wrap;
@@ -313,7 +324,7 @@
       color:#d5e4ff;
       font-size:12px; line-height:1.55;
     }
-    .nums{display:flex;flex-wrap:wrap;gap:7px; margin-top:8px}
+    .nums{display:flex;flex-wrap:wrap;gap:7px; margin-top:8px; justify-content:center}
     .ball{
       position:relative;
       width:40px; height:40px;
@@ -737,40 +748,44 @@
       <div id="reco" class="muted">먼저 <b>INITIATE LOTTO CORE</b>로 데이터를 불러오세요.</div>
     </div>
 
-    <div class="card c6">
-      <h2>✉️ 문의 / 피드백</h2>
-      <form action="https://formspree.io/f/maqddppl" method="POST">
-        <div class="formField">
-          <label for="formName">이름</label>
-          <input id="formName" name="name" type="text" placeholder="이름을 입력하세요" required>
+    <div class="card c12">
+      <h2>✉️ 문의 / 피드백 · 💬 댓글 남기기</h2>
+      <div class="formGrid">
+        <div>
+          <div class="muted" style="margin-bottom:8px;">문의 / 피드백</div>
+          <form action="https://formspree.io/f/maqddppl" method="POST">
+            <div class="formField">
+              <label for="formName">이름</label>
+              <input id="formName" name="name" type="text" placeholder="이름을 입력하세요" required>
+            </div>
+            <div class="formField">
+              <label for="formEmail">이메일</label>
+              <input id="formEmail" name="email" type="email" placeholder="답변 받을 이메일" required>
+            </div>
+            <div class="formField">
+              <label for="formMessage">메시지</label>
+              <textarea id="formMessage" name="message" placeholder="문의 내용을 적어주세요" required></textarea>
+            </div>
+            <button class="formBtn" type="submit">전송하기</button>
+          </form>
         </div>
-        <div class="formField">
-          <label for="formEmail">이메일</label>
-          <input id="formEmail" name="email" type="email" placeholder="답변 받을 이메일" required>
+        <div>
+          <div class="muted" style="margin-bottom:8px;">댓글 남기기</div>
+          <form id="commentForm" action="https://formspree.io/f/maqddppl" method="POST">
+            <div class="formField">
+              <label for="commentName">닉네임</label>
+              <input id="commentName" name="comment_name" type="text" placeholder="닉네임을 입력하세요" required>
+            </div>
+            <div class="formField">
+              <label for="commentBody">댓글</label>
+              <textarea id="commentBody" name="comment_body" placeholder="댓글을 입력하세요" required></textarea>
+            </div>
+            <button class="formBtn" type="submit">댓글 전송</button>
+          </form>
+          <div class="muted" style="margin-top:8px;">작성한 댓글은 이 브라우저에만 저장됩니다.</div>
+          <div id="commentList" class="commentList"></div>
         </div>
-        <div class="formField">
-          <label for="formMessage">메시지</label>
-          <textarea id="formMessage" name="message" placeholder="문의 내용을 적어주세요" required></textarea>
-        </div>
-        <button class="formBtn" type="submit">전송하기</button>
-      </form>
-    </div>
-
-    <div class="card c6">
-      <h2>💬 댓글 남기기</h2>
-      <form id="commentForm" action="https://formspree.io/f/maqddppl" method="POST">
-        <div class="formField">
-          <label for="commentName">닉네임</label>
-          <input id="commentName" name="comment_name" type="text" placeholder="닉네임을 입력하세요" required>
-        </div>
-        <div class="formField">
-          <label for="commentBody">댓글</label>
-          <textarea id="commentBody" name="comment_body" placeholder="댓글을 입력하세요" required></textarea>
-        </div>
-        <button class="formBtn" type="submit">댓글 전송</button>
-      </form>
-      <div class="muted" style="margin-top:8px;">작성한 댓글은 이 브라우저에만 저장됩니다.</div>
-      <div id="commentList" class="commentList"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1286,6 +1301,7 @@
     for (let i=1;i<=lines;i++){
       const pick=weightedSampleUnique(weightsCache, 6);
       const box=document.createElement("div");
+      box.className = "recoBox";
       box.style.marginBottom="10px";
       box.style.borderRadius="18px";
       box.style.border="1px solid rgba(255,255,255,0.10)";
