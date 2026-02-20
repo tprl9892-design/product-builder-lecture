@@ -832,7 +832,7 @@
 
   let dataCache = [];       // [{round, nums}]
   let weightsCache = null;  // 1..45 weights
-  let dataSourceLabel = "SNAPSHOT";
+  let dataSourceLabel = "SYNTHETIC";
   let snapshotMeta = null;
 
   // ===== Theme =====
@@ -1004,6 +1004,35 @@
     if (!data || !Array.isArray(data.draws)) throw new Error("스냅샷 형식이 올바르지 않습니다.");
     snapshotMeta = data;
     return snapshotMeta;
+  }
+
+  // ===== Synthetic data (no network) =====
+  function makeSeed(){
+    return Math.floor(Math.random()*1e9);
+  }
+  function seededRng(seed){
+    let s = seed >>> 0;
+    return () => {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      return (s & 0xffffffff) / 0x100000000;
+    };
+  }
+  function mockDraw(rng){
+    const chosen = new Set();
+    while (chosen.size < 6){
+      const n = 1 + Math.floor(rng()*45);
+      chosen.add(n);
+    }
+    return Array.from(chosen).sort((a,b)=>a-b);
+  }
+  function buildMockData(count=200){
+    const seed = makeSeed();
+    const rng = seededRng(seed);
+    const arr = [];
+    for (let i=1;i<=count;i++){
+      arr.push({ round: i, nums: mockDraw(rng) });
+    }
+    return { data: arr, seed };
   }
 
   async function mapLimit(items, limit, fn){
@@ -1289,19 +1318,35 @@
     btnGenerate.disabled = true;
     robot("AI 코어 부팅…");
     try {
-      const snap = await loadSnapshot();
-      const latest = Number(snap.draws?.[snap.draws.length-1]?.round || 0);
-      const count = Math.min(HISTORY_SIZE, snap.draws.length);
-      const start = Math.max(1, latest - count + 1);
-      robot(`스냅샷 로드 완료: ${snap.draws.length}회`);
-      robot(`${start}~${latest}회 구간 분석 중…`);
-      dataCache = await fetchRecentData(count);
+      let data = [];
+      try {
+        const snap = await loadSnapshot();
+        if (snap.draws && snap.draws.length){
+          const latest = Number(snap.draws?.[snap.draws.length-1]?.round || 0);
+          const count = Math.min(HISTORY_SIZE, snap.draws.length);
+          const start = Math.max(1, latest - count + 1);
+          dataSourceLabel = "SNAPSHOT";
+          robot(`스냅샷 로드 완료: ${snap.draws.length}회`);
+          robot(`${start}~${latest}회 구간 분석 중…`);
+          data = await fetchRecentData(count);
+        }
+      } catch {}
+
+      if (!data.length){
+        const { data: mock, seed } = buildMockData(HISTORY_SIZE);
+        dataSourceLabel = "SYNTHETIC";
+        robot("스냅샷 없음 → 합성 데이터로 분석합니다.");
+        robot(`합성 데이터 생성 완료 (seed=${seed})`);
+        data = mock;
+      }
+
+      dataCache = data;
       robot("분석 준비 완료.");
       renderAll();
     } catch (err){
       const msg = err && err.message ? err.message : String(err);
       robot(`데이터 수집 실패: ${msg}`);
-      recoEl.innerHTML = `<div class="muted">스냅샷 데이터를 불러오지 못했습니다. 스냅샷 파일이 배포되었는지 확인하세요.</div>`;
+      recoEl.innerHTML = `<div class="muted">데이터를 불러오지 못했습니다. 새로고침 후 다시 시도하세요.</div>`;
     } finally {
       btnGenerate.disabled = false;
     }
