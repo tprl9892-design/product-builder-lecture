@@ -620,7 +620,7 @@
         <p class="desc">
           버튼을 누르면 <b>로봇 HUD가 폭발적으로 계산</b>하고 <b>Hot/Cold/Overdue</b> + <b>연속/구간 패턴</b> 분석 →
           <b>1~5줄 번호</b>를 전송합니다.
-          <br><span class="mono muted">※ 스냅샷 기반 통계 분석 · 네트워크 불필요</span>
+          <br><span class="mono muted">※ 로또 1등 당첨 기반 통계 분석</span>
         </p>
         <div class="kpiRow" id="kpiRow"></div>
       </div>
@@ -1182,7 +1182,7 @@
 
     // KPIs
     const first=data[0].round, last=data[data.length-1].round;
-    const k1=document.createElement("div"); k1.className="kpi"; k1.innerHTML=`<span class="miniDot"></span><b>최신 회차</b> <span class="muted">${last}</span>`;
+    const k1=document.createElement("div"); k1.className="kpi"; k1.innerHTML=`<span class="miniDot"></span><b>최신회차 분석완료</b> <span class="muted">${last}</span>`;
     kpiRow.append(k1);
 
     // Analysis
