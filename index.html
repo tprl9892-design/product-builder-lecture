@@ -613,14 +613,14 @@
       <div class="panelHead">
         <div class="brandRow">
           <span class="badge"><span class="dot"></span><span class="mono">LOTTOCORE v1.0</span></span>
-          <span class="badge"><span class="mono">AUTO-LATEST via PROXY</span></span>
+          <span class="badge"><span class="mono">SNAPSHOT ANALYSIS</span></span>
           <button id="themeToggle" class="pill themeBtn" type="button" aria-pressed="false">테마 전환</button>
         </div>
         <h1>🤖 LottoMind-AI · 미래형 로또 분석 & 생성 시스템</h1>
         <p class="desc">
           버튼을 누르면 <b>로봇 HUD가 폭발적으로 계산</b>하고 <b>Hot/Cold/Overdue</b> + <b>연속/구간 패턴</b> 분석 →
           <b>1~5줄 번호</b>를 전송합니다.
-          <br><span class="mono muted">※ 네트워크 수집 없이 즉시 분석 연출</span>
+          <br><span class="mono muted">※ 스냅샷 기반 통계 분석 · 네트워크 불필요</span>
         </p>
         <div class="kpiRow" id="kpiRow"></div>
       </div>
@@ -801,36 +801,7 @@
   // https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=회차
   const ROBOT = "LottoMind-AI";
   const HISTORY_SIZE = 200;
-  const API_BASE = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=";
-  const PROXY_LIST = [
-    {
-      name: "isomorphic-git",
-      build: (url) => `https://cors.isomorphic-git.org/${url}`,
-      parse: (res) => res.json(),
-    },
-    {
-      name: "corsproxy.io",
-      build: (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-      parse: (res) => res.json(),
-    },
-    {
-      name: "codetabs",
-      build: (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-      parse: (res) => res.json(),
-    },
-    {
-      name: "jina.ai",
-      build: (url) => `https://r.jina.ai/http://${url.replace("https://", "").replace("http://", "")}`,
-      parse: async (res) => JSON.parse(await res.text()),
-    },
-    {
-      name: "allorigins",
-      build: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-      parse: (res) => res.json(),
-    },
-  ];
-  const START_DATE = new Date("2002-12-07T20:35:00+09:00");
-  const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+  const SNAPSHOT_URL = "data/lotto_draws.json";
   const $ = (id) => document.getElementById(id);
 
   const logEl = $("log");
@@ -861,8 +832,8 @@
 
   let dataCache = [];       // [{round, nums}]
   let weightsCache = null;  // 1..45 weights
-  let useProxy = false;
-  let dataSourceLabel = "DHLottery API";
+  let dataSourceLabel = "SNAPSHOT";
+  let snapshotMeta = null;
 
   // ===== Theme =====
   const themeKey = "lottoTheme";
@@ -1025,107 +996,14 @@
   }
   drawBg();
 
-  // ===== Live data (via server proxy) =====
-  async function fetchDraw(drawNo){
-    if (!useProxy){
-      try {
-        const res = await fetch(`/api/lotto?drawNo=${encodeURIComponent(drawNo)}`, { cache: "no-store" });
-        if (!res.ok){
-          let msg = "네트워크 오류";
-          try {
-            const err = await res.json();
-            if (err && err.error) msg = err.error;
-          } catch {}
-          throw new Error(msg);
-        }
-        const ct = res.headers.get("content-type") || "";
-        if (!ct.includes("application/json")){
-          throw new Error("API 응답이 JSON이 아닙니다.");
-        }
-        const data = await res.json();
-        if (data && data.error) throw new Error(data.error);
-        if (data && data.returnValue && data.returnValue !== "success") throw new Error("조회 실패");
-        dataSourceLabel = "DHLottery API (Pages)";
-        return data;
-      } catch {
-        useProxy = true;
-        dataSourceLabel = "DHLottery API (proxy)";
-      }
-    }
-    return await fetchDrawViaProxy(drawNo);
-  }
-
-  async function fetchDrawViaProxy(drawNo){
-    let target = drawNo;
-    if (drawNo === "latest"){
-      target = await findLatestDrawNoProxy();
-    }
-    const url = `${API_BASE}${target}`;
-    let lastErr = null;
-    for (const proxy of PROXY_LIST){
-      try {
-        const res = await fetch(proxy.build(url), { cache: "no-store" });
-        if (!res.ok) throw new Error("프록시 네트워크 오류");
-        const data = proxy.parse ? await proxy.parse(res) : await res.json();
-        if (data && data.error) throw new Error(data.error);
-        if (data && data.returnValue && data.returnValue !== "success") throw new Error("조회 실패");
-        dataSourceLabel = `DHLottery API (${proxy.name})`;
-        return data;
-      } catch (err){
-        lastErr = err;
-      }
-    }
-    throw lastErr || new Error("프록시 네트워크 오류");
-  }
-
-  async function fetchDrawSafeViaProxy(drawNo){
-    const url = `${API_BASE}${drawNo}`;
-    for (const proxy of PROXY_LIST){
-      try {
-        const res = await fetch(proxy.build(url), { cache: "no-store" });
-        if (!res.ok) continue;
-        const data = proxy.parse ? await proxy.parse(res) : await res.json();
-        if (data && data.returnValue === "success") return data;
-      } catch {}
-    }
-    return null;
-  }
-
-  async function findLatestDrawNoProxy(){
-    const estimate = Math.floor((Date.now() - START_DATE.getTime()) / WEEK_MS) + 1;
-    let low = Math.max(1, estimate - 8);
-    let high = estimate + 8;
-
-    for (let i = 0; i < 12; i += 1) {
-      const result = await fetchDrawSafeViaProxy(low);
-      if (result) break;
-      low = Math.max(1, low - 1);
-    }
-
-    for (let i = 0; i < 12; i += 1) {
-      const result = await fetchDrawSafeViaProxy(high);
-      if (!result) break;
-      high += 2;
-    }
-
-    let left = low;
-    let right = high;
-    for (let i = 0; i < 24; i += 1) {
-      if (left + 1 >= right) break;
-      const mid = Math.floor((left + right) / 2);
-      const result = await fetchDrawSafeViaProxy(mid);
-      if (result) left = mid;
-      else right = mid;
-    }
-    return left;
-  }
-
-  function drawToRecord(data){
-    const nums = [data.drwtNo1, data.drwtNo2, data.drwtNo3, data.drwtNo4, data.drwtNo5, data.drwtNo6]
-      .map(Number)
-      .filter(Number.isFinite)
-      .sort((a,b)=>a-b);
-    return { round: Number(data.drwNo), nums };
+  async function loadSnapshot(){
+    if (snapshotMeta) return snapshotMeta;
+    const res = await fetch(SNAPSHOT_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("스냅샷 파일을 불러오지 못했습니다.");
+    const data = await res.json();
+    if (!data || !Array.isArray(data.draws)) throw new Error("스냅샷 형식이 올바르지 않습니다.");
+    snapshotMeta = data;
+    return snapshotMeta;
   }
 
   async function mapLimit(items, limit, fn){
@@ -1142,18 +1020,17 @@
     return results;
   }
 
-  async function fetchRecentData(latest, count){
-    const end = Math.max(1, Number(latest));
-    const start = Math.max(1, end - count + 1);
-    const rounds = [];
-    for (let n=start; n<=end; n++) rounds.push(n);
-    const concurrency = useProxy ? 2 : 6;
-    const rows = await mapLimit(rounds, concurrency, async (n) => {
-      const data = await fetchDraw(n);
-      return drawToRecord(data);
-    });
-    rows.sort((a,b)=>a.round-b.round);
-    return rows;
+  async function fetchRecentData(count){
+    const snap = await loadSnapshot();
+    const all = snap.draws || [];
+    if (!all.length) return [];
+    const slice = all.slice(Math.max(0, all.length - count));
+    return slice.map((d) => ({
+      round: Number(d.round),
+      nums: Array.isArray(d.nums) ? d.nums.slice().sort((a,b)=>a-b) : [],
+      bonus: Number(d.bonus),
+      date: d.date,
+    }));
   }
 
   // ===== Analysis =====
@@ -1315,6 +1192,9 @@
     statusEl.appendChild(chip("최신 회차", latest));
     statusEl.appendChild(chip("가중치", "READY"));
     statusEl.appendChild(chip("데이터 소스", dataSourceLabel));
+    if (snapshotMeta?.updatedAt){
+      statusEl.appendChild(chip("스냅샷 시각", new Date(snapshotMeta.updatedAt).toLocaleDateString()));
+    }
 
     recoEl.innerHTML = `<div class="muted">준비 완료. <b>RELEASE ENERGY BURST</b>를 누르면 로봇이 계산합니다.</div>`;
     btnGenerate.disabled = false;
@@ -1409,19 +1289,19 @@
     btnGenerate.disabled = true;
     robot("AI 코어 부팅…");
     try {
-      const latestData = await fetchDraw("latest");
-      const latest = Number(latestData.drwNo);
-      const count = Math.min(HISTORY_SIZE, latest);
+      const snap = await loadSnapshot();
+      const latest = Number(snap.draws?.[snap.draws.length-1]?.round || 0);
+      const count = Math.min(HISTORY_SIZE, snap.draws.length);
       const start = Math.max(1, latest - count + 1);
-      robot(`최신 회차 확인: ${latest}회`);
-      robot(`${start}~${latest}회 데이터 수집 중…`);
-      dataCache = await fetchRecentData(latest, count);
-      robot("데이터 수집 완료.");
+      robot(`스냅샷 로드 완료: ${snap.draws.length}회`);
+      robot(`${start}~${latest}회 구간 분석 중…`);
+      dataCache = await fetchRecentData(count);
+      robot("분석 준비 완료.");
       renderAll();
     } catch (err){
       const msg = err && err.message ? err.message : String(err);
       robot(`데이터 수집 실패: ${msg}`);
-      recoEl.innerHTML = `<div class="muted">실제 로또 데이터를 불러오지 못했습니다. 잠시 후 다시 시도하거나 네트워크 상태를 확인하세요.</div>`;
+      recoEl.innerHTML = `<div class="muted">스냅샷 데이터를 불러오지 못했습니다. 스냅샷 파일이 배포되었는지 확인하세요.</div>`;
     } finally {
       btnGenerate.disabled = false;
     }
