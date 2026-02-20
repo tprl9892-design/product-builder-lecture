@@ -804,16 +804,29 @@
   const API_BASE = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=";
   const PROXY_LIST = [
     {
+      name: "isomorphic-git",
+      build: (url) => `https://cors.isomorphic-git.org/${url}`,
+      parse: (res) => res.json(),
+    },
+    {
       name: "corsproxy.io",
       build: (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      parse: (res) => res.json(),
     },
     {
       name: "codetabs",
       build: (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+      parse: (res) => res.json(),
+    },
+    {
+      name: "jina.ai",
+      build: (url) => `https://r.jina.ai/http://${url.replace(/^https?:\\/\\//, "")}`,
+      parse: async (res) => JSON.parse(await res.text()),
     },
     {
       name: "allorigins",
       build: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      parse: (res) => res.json(),
     },
   ];
   const START_DATE = new Date("2002-12-07T20:35:00+09:00");
@@ -1053,7 +1066,7 @@
       try {
         const res = await fetch(proxy.build(url), { cache: "no-store" });
         if (!res.ok) throw new Error("프록시 네트워크 오류");
-        const data = await res.json();
+        const data = proxy.parse ? await proxy.parse(res) : await res.json();
         if (data && data.error) throw new Error(data.error);
         if (data && data.returnValue && data.returnValue !== "success") throw new Error("조회 실패");
         dataSourceLabel = `DHLottery API (${proxy.name})`;
@@ -1071,7 +1084,7 @@
       try {
         const res = await fetch(proxy.build(url), { cache: "no-store" });
         if (!res.ok) continue;
-        const data = await res.json();
+        const data = proxy.parse ? await proxy.parse(res) : await res.json();
         if (data && data.returnValue === "success") return data;
       } catch {}
     }
@@ -1134,7 +1147,8 @@
     const start = Math.max(1, end - count + 1);
     const rounds = [];
     for (let n=start; n<=end; n++) rounds.push(n);
-    const rows = await mapLimit(rounds, 6, async (n) => {
+    const concurrency = useProxy ? 2 : 6;
+    const rows = await mapLimit(rounds, concurrency, async (n) => {
       const data = await fetchDraw(n);
       return drawToRecord(data);
     });
