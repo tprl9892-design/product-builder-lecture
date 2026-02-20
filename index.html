@@ -802,7 +802,20 @@
   const ROBOT = "LottoMind-AI";
   const HISTORY_SIZE = 200;
   const API_BASE = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=";
-  const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+  const PROXY_LIST = [
+    {
+      name: "corsproxy.io",
+      build: (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    },
+    {
+      name: "codetabs",
+      build: (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    },
+    {
+      name: "allorigins",
+      build: (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    },
+  ];
   const START_DATE = new Date("2002-12-07T20:35:00+09:00");
   const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
   const $ = (id) => document.getElementById(id);
@@ -1035,24 +1048,34 @@
       target = await findLatestDrawNoProxy();
     }
     const url = `${API_BASE}${target}`;
-    const res = await fetch(`${CORS_PROXY}${encodeURIComponent(url)}`, { cache: "no-store" });
-    if (!res.ok) throw new Error("프록시 네트워크 오류");
-    const data = await res.json();
-    if (data && data.error) throw new Error(data.error);
-    if (data && data.returnValue && data.returnValue !== "success") throw new Error("조회 실패");
-    return data;
+    let lastErr = null;
+    for (const proxy of PROXY_LIST){
+      try {
+        const res = await fetch(proxy.build(url), { cache: "no-store" });
+        if (!res.ok) throw new Error("프록시 네트워크 오류");
+        const data = await res.json();
+        if (data && data.error) throw new Error(data.error);
+        if (data && data.returnValue && data.returnValue !== "success") throw new Error("조회 실패");
+        dataSourceLabel = `DHLottery API (${proxy.name})`;
+        return data;
+      } catch (err){
+        lastErr = err;
+      }
+    }
+    throw lastErr || new Error("프록시 네트워크 오류");
   }
 
   async function fetchDrawSafeViaProxy(drawNo){
-    try {
-      const url = `${API_BASE}${drawNo}`;
-      const res = await fetch(`${CORS_PROXY}${encodeURIComponent(url)}`, { cache: "no-store" });
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data && data.returnValue === "success" ? data : null;
-    } catch {
-      return null;
+    const url = `${API_BASE}${drawNo}`;
+    for (const proxy of PROXY_LIST){
+      try {
+        const res = await fetch(proxy.build(url), { cache: "no-store" });
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (data && data.returnValue === "success") return data;
+      } catch {}
     }
+    return null;
   }
 
   async function findLatestDrawNoProxy(){
