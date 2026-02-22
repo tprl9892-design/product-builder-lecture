@@ -695,6 +695,34 @@
         radial-gradient(1000px 700px at 85% 25%, rgba(139,92,255,0.10), transparent 60%),
         rgba(245,248,255,0.88);
     }
+    :root[data-theme="light"] .megaBtn,
+    :root[data-theme="light"] .formBtn{
+      color:#0b1020;
+    }
+    :root[data-theme="light"] .megaBtn .sub{
+      color:#1a2336;
+    }
+    :root[data-theme="light"] .kpi b{
+      color:#0b1020;
+    }
+
+    .disclaimer{
+      margin-top:16px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.03);
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.5;
+      text-align:center;
+      opacity:0.85;
+    }
+    :root[data-theme="light"] .disclaimer{
+      border-color: rgba(11,16,32,0.18);
+      background: rgba(11,16,32,0.04);
+      color: var(--muted);
+    }
 
     a{color:inherit}
   </style>
@@ -827,6 +855,11 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="disclaimer">
+    본 서비스는 통계 기반 분석 및 참고용 추천 번호를 제공하며, 당첨을 보장하지 않습니다.<br>
+    로또 구매는 개인의 판단과 책임하에 진행하시기 바랍니다.
   </div>
 </div>
 
