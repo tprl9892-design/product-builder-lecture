@@ -388,6 +388,18 @@
       transform: translateY(8px) scale(0.6);
       animation: ballPop 0.65s cubic-bezier(.2,.9,.2,1) both;
     }
+    .ball.powerball{
+      color:#fff2f2;
+      background:
+        radial-gradient(12px 12px at 28% 24%, rgba(255,255,255,0.8), transparent 60%),
+        radial-gradient(18px 18px at 72% 78%, rgba(0,0,0,0.35), transparent 60%),
+        linear-gradient(180deg, #ff7a7a, #c83535 55%, #5a0e0e);
+      border-color: rgba(255,255,255,0.35);
+      box-shadow:
+        0 10px 26px rgba(120,0,0,0.45),
+        0 0 0 1px rgba(255,255,255,0.18) inset,
+        0 6px 14px rgba(255,255,255,0.10) inset;
+    }
     .ball::before{
       content:"";
       position:absolute;
@@ -428,6 +440,7 @@
 
     /* ===== HUD Overlay (robot compute) ===== */
     .hud.hidden{ display:none; }
+    .isHidden{ display:none !important; }
     .hud{
       position:fixed; inset:0; z-index:9999;
       display:grid; place-items:center;
@@ -750,15 +763,25 @@
           <button id="themeToggle" class="pill themeBtn" type="button" aria-pressed="false">테마 전환</button>
         </div>
         <h1>🤖 LottoMind-AI · 미래형 로또 분석 & 생성 시스템</h1>
-        <p class="desc">
+        <p id="descMain" class="desc">
           버튼을 누르면 <b>로봇 HUD가 폭발적으로 계산</b>하고 <b>Hot/Cold/Overdue</b> + <b>연속/구간 패턴</b> 분석 →
           <b>1~5줄 번호</b>를 전송합니다.
           <br><span class="mono muted">※ 로또 1등 당첨 기반 통계 분석</span>
         </p>
+        <div id="modeNote" class="muted" style="margin-top:-4px;">
+          현재 모드: K-Lotto (6/45) · 스냅샷 기반 분석 제공
+        </div>
         <div class="kpiRow" id="kpiRow"></div>
       </div>
 
       <div class="controls">
+        <div class="pill">
+          <span class="muted">로또 종류</span>
+          <select id="lotteryType">
+            <option value="kr" selected>K-Lotto (6/45)</option>
+            <option value="powerball">US Powerball (5+1)</option>
+          </select>
+        </div>
         <div class="pill">
           <span class="muted">생성 줄 수</span>
           <select id="lineCount">
@@ -796,25 +819,45 @@
     </div>
   </div>
 
-  <div class="grid">
-    <div class="card c6">
+  <div class="grid" id="analysisGrid">
+    <div class="card c6 analysisCard">
       <h2>🔥 HOT (많이 나온 TOP 10)</h2>
       <div id="hot" class="chips"></div>
     </div>
 
-    <div class="card c6">
+    <div class="card c6 analysisCard">
       <h2>🧊 COLD (적게 나온 TOP 10)</h2>
       <div id="cold" class="chips"></div>
     </div>
 
-    <div class="card c6">
+    <div class="card c6 analysisCard">
       <h2>⏳ OVERDUE (오래 안 나온 TOP 10)</h2>
       <div id="overdue" class="chips"></div>
     </div>
 
-    <div class="card c6">
+    <div class="card c6 analysisCard">
       <h2>📊 패턴 분석 (연속번호 / 구간)</h2>
       <div id="pattern" class="chips"></div>
+    </div>
+
+    <div class="card c6 powerballCard isHidden">
+      <h2>🇺🇸 WHITE HOT (상위 10)</h2>
+      <div id="pbWhiteHot" class="chips"></div>
+    </div>
+
+    <div class="card c6 powerballCard isHidden">
+      <h2>🇺🇸 WHITE COLD (하위 10)</h2>
+      <div id="pbWhiteCold" class="chips"></div>
+    </div>
+
+    <div class="card c6 powerballCard isHidden">
+      <h2>🇺🇸 WHITE OVERDUE (상위 10)</h2>
+      <div id="pbWhiteOverdue" class="chips"></div>
+    </div>
+
+    <div class="card c6 powerballCard isHidden">
+      <h2>🔴 POWERBALL STATS</h2>
+      <div id="pbRedStats" class="chips"></div>
     </div>
 
     <div class="card c6">
@@ -869,6 +912,10 @@
   <div class="disclaimer">
     본 서비스는 통계 기반 분석 및 참고용 추천 번호를 제공하며, 당첨을 보장하지 않습니다.<br>
     로또 구매는 개인의 판단과 책임하에 진행하시기 바랍니다.
+  </div>
+  <div id="powerballDisclaimer" class="disclaimer isHidden">
+    Powerball 모드는 무작위 샘플링 및 통계 참고용이며, 당첨을 보장하지 않습니다.<br>
+    본 서비스는 Powerball 및 관련 기관과 무관합니다.
   </div>
 </div>
 
@@ -947,6 +994,8 @@
   const ROBOT = "LottoMind-AI";
   const HISTORY_SIZE = 200;
   const SNAPSHOT_URL = "data/lotto_draws.json";
+  const POWERBALL_SNAPSHOT_URL = "data/powerball_draws.json";
+  const POWERBALL_FORMAT_START = "2015-10-07";
   const $ = (id) => document.getElementById(id);
 
   const logEl = $("log");
@@ -954,15 +1003,25 @@
   const coldEl = $("cold");
   const overdueEl = $("overdue");
   const patternEl = $("pattern");
+  const pbWhiteHotEl = $("pbWhiteHot");
+  const pbWhiteColdEl = $("pbWhiteCold");
+  const pbWhiteOverdueEl = $("pbWhiteOverdue");
+  const pbRedStatsEl = $("pbRedStats");
   const recoEl = $("reco");
   const statusEl = $("status");
   const kpiRow = $("kpiRow");
   const commentForm = $("commentForm");
   const commentList = $("commentList");
   const commentClearAll = $("commentClearAll");
+  const descMain = $("descMain");
+  const powerballDisclaimer = $("powerballDisclaimer");
 
   const btnGenerate = $("btnGenerate");
   const lineCountEl = $("lineCount");
+  const lotteryTypeEl = $("lotteryType");
+  const modeNote = $("modeNote");
+  const analysisCards = document.querySelectorAll(".analysisCard");
+  const powerballCards = document.querySelectorAll(".powerballCard");
   const themeToggle = $("themeToggle");
 
   // HUD
@@ -978,8 +1037,12 @@
 
   let dataCache = [];       // [{round, nums}]
   let weightsCache = null;  // 1..45 weights
+  let pbDataCache = [];      // [{date, white, power}]
+  let pbWeightsWhite = null; // 1..69 weights
+  let pbWeightsRed = null;   // 1..26 weights
   let dataSourceLabel = "SYNTHETIC";
   let snapshotMeta = null;
+  let pbSnapshotMeta = null;
 
   // ===== Theme =====
   const themeKey = "lottoTheme";
@@ -1082,6 +1145,15 @@
     return wrap;
   };
 
+  function sampleUnique(max, count){
+    const chosen = new Set();
+    while (chosen.size < count){
+      chosen.add(1 + Math.floor(Math.random() * max));
+    }
+    return Array.from(chosen).sort((a,b)=>a-b);
+  }
+
+
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   function clearUI(full=true){
@@ -1089,11 +1161,42 @@
     coldEl.innerHTML = "";
     overdueEl.innerHTML = "";
     patternEl.innerHTML = "";
+    if (pbWhiteHotEl) pbWhiteHotEl.innerHTML = "";
+    if (pbWhiteColdEl) pbWhiteColdEl.innerHTML = "";
+    if (pbWhiteOverdueEl) pbWhiteOverdueEl.innerHTML = "";
+    if (pbRedStatsEl) pbRedStatsEl.innerHTML = "";
     if (statusEl) statusEl.innerHTML = "";
     kpiRow.innerHTML = "";
     if (full) {
       recoEl.innerHTML = `<div class="muted">먼저 <b>INITIATE LOTTO CORE</b>로 데이터를 불러오세요.</div>`;
       logEl.textContent = "";
+    }
+  }
+
+  function setMode(mode){
+    const isPowerball = mode === "powerball";
+    analysisCards.forEach((el)=>el.classList.toggle("isHidden", isPowerball));
+    powerballCards.forEach((el)=>el.classList.toggle("isHidden", !isPowerball));
+    kpiRow.classList.toggle("isHidden", isPowerball);
+    if (powerballDisclaimer) powerballDisclaimer.classList.toggle("isHidden", !isPowerball);
+    if (modeNote){
+      modeNote.textContent = isPowerball
+        ? "현재 모드: US Powerball (5+1) · 스냅샷 기반 분석"
+        : "현재 모드: K-Lotto (6/45) · 스냅샷 기반 분석 제공";
+    }
+    if (descMain){
+      descMain.innerHTML = isPowerball
+        ? "Powerball 모드에서는 최근 데이터 스냅샷을 기반으로 가중치 샘플링을 수행합니다."
+        : "버튼을 누르면 <b>로봇 HUD가 폭발적으로 계산</b>하고 <b>Hot/Cold/Overdue</b> + <b>연속/구간 패턴</b> 분석 → <b>1~5줄 번호</b>를 전송합니다.<br><span class=\"mono muted\">※ 과거 데이터 기반 통계 분석</span>";
+    }
+    if (btnGenerate){
+      btnGenerate.innerHTML = isPowerball
+        ? "RUN POWERBALL\n          <span class=\"sub\">5개 + 파워볼 1개 번호 생성</span>"
+        : "RUN AI ANALYSIS\n          <span class=\"sub\">로봇 HUD 계산 후 추천 번호 출력</span>";
+    }
+    clearUI(true);
+    if (isPowerball){
+      recoEl.innerHTML = `<div class="muted">Powerball 모드: <b>RUN POWERBALL</b>을 누르면 5+1 번호를 생성합니다.</div>`;
     }
   }
 
@@ -1164,6 +1267,15 @@
     snapshotMeta = data;
     return snapshotMeta;
   }
+  async function loadPowerballSnapshot(){
+    if (pbSnapshotMeta) return pbSnapshotMeta;
+    const res = await fetch(POWERBALL_SNAPSHOT_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("Powerball 스냅샷을 불러오지 못했습니다.");
+    const data = await res.json();
+    if (!data || !Array.isArray(data.draws)) throw new Error("Powerball 스냅샷 형식이 올바르지 않습니다.");
+    pbSnapshotMeta = data;
+    return pbSnapshotMeta;
+  }
 
   // ===== Synthetic data (no network) =====
   function makeSeed(){
@@ -1180,6 +1292,14 @@
     const chosen = new Set();
     while (chosen.size < 6){
       const n = 1 + Math.floor(rng()*45);
+      chosen.add(n);
+    }
+    return Array.from(chosen).sort((a,b)=>a-b);
+  }
+  function mockDrawRange(rng, max, count){
+    const chosen = new Set();
+    while (chosen.size < count){
+      const n = 1 + Math.floor(rng()*max);
       chosen.add(n);
     }
     return Array.from(chosen).sort((a,b)=>a-b);
@@ -1220,6 +1340,17 @@
       date: d.date,
     }));
   }
+  async function fetchRecentPowerballData(count){
+    const snap = await loadPowerballSnapshot();
+    const all = snap.draws || [];
+    if (!all.length) return [];
+    const slice = all.slice(Math.max(0, all.length - count));
+    return slice.map((d) => ({
+      date: d.date,
+      white: Array.isArray(d.white) ? d.white.slice().sort((a,b)=>a-b) : [],
+      power: Number(d.power),
+    }));
+  }
 
   // ===== Analysis =====
   function freqAnalysis(data){
@@ -1237,6 +1368,27 @@
     }
     return { overdue, latest };
   }
+  function freqAnalysisRange(data, max, getter){
+    const freq = Array(max + 1).fill(0);
+    for (const d of data){
+      const nums = getter(d) || [];
+      for (const n of nums) if (n>=1 && n<=max) freq[n] += 1;
+    }
+    return freq;
+  }
+  function overdueAnalysisRange(data, max, getter){
+    const latest = Math.max(0, data.length - 1);
+    const lastSeen = Array(max + 1).fill(null);
+    data.forEach((d, idx) => {
+      const nums = getter(d) || [];
+      for (const n of nums) if (n>=1 && n<=max) lastSeen[n] = idx;
+    });
+    const overdue = Array(max + 1).fill(0);
+    for (let n=1;n<=max;n++){
+      overdue[n] = (lastSeen[n]==null) ? Infinity : (latest - lastSeen[n]);
+    }
+    return { overdue, latest };
+  }
   function minmaxNormalize(arr, start=1, end=45){
     let mn=Infinity, mx=-Infinity;
     for (let i=start;i<=end;i++){
@@ -1250,24 +1402,24 @@
     }
     return out;
   }
-  function buildWeights(freq, overdue, wFreq=0.55, wOver=0.45){
-    const f=minmaxNormalize(freq);
-    const o=minmaxNormalize(overdue);
-    const w=Array(46).fill(0);
-    for (let n=1;n<=45;n++){
+  function buildWeights(freq, overdue, wFreq=0.55, wOver=0.45, max=45){
+    const f=minmaxNormalize(freq, 1, max);
+    const o=minmaxNormalize(overdue, 1, max);
+    const w=Array(max + 1).fill(0);
+    for (let n=1;n<=max;n++){
       w[n]=wFreq*f[n]+wOver*o[n];
       w[n]=Math.max(w[n], 0.02);
     }
     return w;
   }
-  function weightedSampleUnique(weights, k=6){
+  function weightedSampleUnique(weights, k=6, max=45){
     const chosen=new Set();
     while (chosen.size<k){
       let sum=0;
-      for (let i=1;i<=45;i++) sum += (chosen.has(i)?0:weights[i]);
+      for (let i=1;i<=max;i++) sum += (chosen.has(i)?0:weights[i]);
       let r=Math.random()*sum;
       let pick=1;
-      for (let i=1;i<=45;i++){
+      for (let i=1;i<=max;i++){
         if (chosen.has(i)) continue;
         r -= weights[i];
         if (r<=0){ pick=i; break; }
@@ -1275,6 +1427,16 @@
       chosen.add(pick);
     }
     return Array.from(chosen).sort((a,b)=>a-b);
+  }
+  function weightedSampleOne(weights, max){
+    let sum=0;
+    for (let i=1;i<=max;i++) sum += weights[i];
+    let r=Math.random()*sum;
+    for (let i=1;i<=max;i++){
+      r -= weights[i];
+      if (r<=0) return i;
+    }
+    return 1 + Math.floor(Math.random() * max);
   }
 
   // Pattern analysis (연속/구간)
@@ -1391,10 +1553,51 @@
     btnGenerate.disabled = false;
   }
 
+  function renderPowerballAnalysis(){
+    if (!pbDataCache.length){
+      recoEl.innerHTML = `<div class="muted">Powerball 데이터가 없습니다. 스냅샷을 확인하세요.</div>`;
+      return;
+    }
+    const whiteFreq = freqAnalysisRange(pbDataCache, 69, (d)=>d.white);
+    const whiteOver = overdueAnalysisRange(pbDataCache, 69, (d)=>d.white);
+    const redFreq = freqAnalysisRange(pbDataCache, 26, (d)=>[d.power]);
+    const redOver = overdueAnalysisRange(pbDataCache, 26, (d)=>[d.power]);
+    pbWeightsWhite = buildWeights(whiteFreq, whiteOver.overdue, 0.55, 0.45, 69);
+    pbWeightsRed = buildWeights(redFreq, redOver.overdue, 0.55, 0.45, 26);
+
+    if (pbWhiteHotEl) pbWhiteHotEl.innerHTML = "";
+    if (pbWhiteColdEl) pbWhiteColdEl.innerHTML = "";
+    if (pbWhiteOverdueEl) pbWhiteOverdueEl.innerHTML = "";
+    if (pbRedStatsEl) pbRedStatsEl.innerHTML = "";
+
+    const whitePairs = [];
+    for (let n=1;n<=69;n++) whitePairs.push([n, whiteFreq[n]]);
+    whitePairs.sort((a,b)=>b[1]-a[1]);
+    whitePairs.slice(0,10).forEach(([n,c])=>pbWhiteHotEl.appendChild(chip(n, `${c}회`)));
+    whitePairs.slice().sort((a,b)=>a[1]-b[1]).slice(0,10).forEach(([n,c])=>pbWhiteColdEl.appendChild(chip(n, `${c}회`)));
+
+    const whiteOd = [];
+    for (let n=1;n<=69;n++) if (Number.isFinite(whiteOver.overdue[n])) whiteOd.push([n, whiteOver.overdue[n]]);
+    whiteOd.sort((a,b)=>b[1]-a[1]);
+    whiteOd.slice(0,10).forEach(([n,d])=>pbWhiteOverdueEl.appendChild(chip(n, `${d}회 미출현`)));
+
+    const redPairs = [];
+    for (let n=1;n<=26;n++) redPairs.push([n, redFreq[n]]);
+    redPairs.sort((a,b)=>b[1]-a[1]);
+    redPairs.slice(0,8).forEach(([n,c])=>pbRedStatsEl.appendChild(chip(`HOT ${n}`, `${c}회`)));
+    redPairs.slice().sort((a,b)=>a[1]-b[1]).slice(0,6).forEach(([n,c])=>pbRedStatsEl.appendChild(chip(`COLD ${n}`, `${c}회`)));
+    const redOd = [];
+    for (let n=1;n<=26;n++) if (Number.isFinite(redOver.overdue[n])) redOd.push([n, redOver.overdue[n]]);
+    redOd.sort((a,b)=>b[1]-a[1]);
+    redOd.slice(0,6).forEach(([n,d])=>pbRedStatsEl.appendChild(chip(`OVERDUE ${n}`, `${d}회 미출현`)));
+
+    recoEl.innerHTML = `<div class="muted">준비 완료. <b>RUN POWERBALL</b>을 누르면 추천 번호를 생성합니다.</div>`;
+  }
+
   function renderRecommendations(lines){
     recoEl.innerHTML = "";
     for (let i=1;i<=lines;i++){
-      const pick=weightedSampleUnique(weightsCache, 6);
+      const pick=weightedSampleUnique(weightsCache, 6, 45);
       const box=document.createElement("div");
       box.className = "recoBox";
       box.style.marginBottom="10px";
@@ -1404,6 +1607,34 @@
       box.style.padding="12px";
       box.innerHTML = `<div class="mono muted">SET ${i} :: AI-Weighted Sampling</div>`;
       box.appendChild(balls(pick));
+      recoEl.appendChild(box);
+    }
+  }
+
+  function renderPowerballRecommendations(lines){
+    recoEl.innerHTML = "";
+    for (let i=1;i<=lines;i++){
+      const whites = pbWeightsWhite
+        ? weightedSampleUnique(pbWeightsWhite, 5, 69)
+        : sampleUnique(69, 5);
+      const power = pbWeightsRed
+        ? weightedSampleOne(pbWeightsRed, 26)
+        : 1 + Math.floor(Math.random() * 26);
+      const box=document.createElement("div");
+      box.className = "recoBox";
+      box.style.marginBottom="10px";
+      box.style.borderRadius="18px";
+      box.style.border="1px solid rgba(255,255,255,0.10)";
+      box.style.background="rgba(255,255,255,0.03)";
+      box.style.padding="12px";
+      box.innerHTML = `<div class="mono muted">SET ${i} :: Powerball Weighted</div>`;
+      const wrap = balls(whites);
+      const pb = document.createElement("div");
+      pb.className = "ball powerball";
+      pb.textContent = power;
+      pb.style.animationDelay = `${whites.length * 0.08}s`;
+      wrap.appendChild(pb);
+      box.appendChild(wrap);
       recoEl.appendChild(box);
     }
   }
@@ -1494,13 +1725,13 @@
       hudFrame.classList.add("analyzing");
       hudBar.style.width = "12%";
       hudPct.textContent = "12%";
-      hudStep.textContent = "AI 로또 1등당첨 분석중…";
+      hudStep.textContent = "과거 데이터 분석중…";
       hudConsole.textContent = "";
       hudLog("[LottoMind-AI] 양자 휴리스틱 스캔 부팅");
       await sleep(280);
       hudBar.style.width = "24%";
       hudPct.textContent = "24%";
-      hudLog("[LottoMind-AI] 1등 당첨 히스토리 벡터 잠금");
+      hudLog("[LottoMind-AI] 히스토리 벡터 잠금");
       await sleep(280);
       hudBar.style.width = "38%";
       hudPct.textContent = "38%";
@@ -1563,10 +1794,59 @@
     }
   }
 
+  async function preparePowerballAnalysis(){
+    clearUI(true);
+    btnGenerate.disabled = true;
+    robot("Powerball 분석 준비 중…");
+    try {
+      let data = [];
+      try {
+        const snap = await loadPowerballSnapshot();
+        if (snap.draws && snap.draws.length){
+          const count = Math.min(HISTORY_SIZE, snap.draws.length);
+          data = await fetchRecentPowerballData(count);
+          robot(`Powerball 스냅샷 로드 완료: ${snap.draws.length}회`);
+          robot(`최근 ${count}회 분석 (${POWERBALL_FORMAT_START}+ 규격)`);
+        }
+      } catch (err){
+        const msg = err && err.message ? err.message : String(err);
+        robot(`Powerball 스냅샷 실패: ${msg}`);
+      }
+
+      if (!data.length){
+        const seed = makeSeed();
+        const rng = seededRng(seed);
+        const mock = Array.from({length: HISTORY_SIZE}, () => ({
+          date: new Date().toISOString().slice(0,10),
+          white: mockDrawRange(rng, 69, 5),
+          power: 1 + Math.floor(rng()*26),
+        }));
+        robot("Powerball 스냅샷 없음 → 합성 데이터로 분석합니다.");
+        robot(`합성 데이터 생성 완료 (seed=${seed})`);
+        data = mock;
+      }
+
+      pbDataCache = data;
+      renderPowerballAnalysis();
+    } catch (err){
+      const msg = err && err.message ? err.message : String(err);
+      robot(`Powerball 분석 실패: ${msg}`);
+      recoEl.innerHTML = `<div class="muted">Powerball 데이터를 불러오지 못했습니다.</div>`;
+    } finally {
+      btnGenerate.disabled = false;
+    }
+  }
+
   // ===== Events =====
   btnGenerate.addEventListener("click", async ()=>{
     spawnSparks(btnGenerate, 28);
     const lines = Math.min(10, Math.max(1, Number(lineCountEl.value || 10)));
+    const mode = lotteryTypeEl?.value || "kr";
+    if (mode === "powerball"){
+      await preparePowerballAnalysis();
+      renderPowerballRecommendations(lines);
+      return;
+    }
     await prepareAnalysis();
     await runRobotCompute(lines);
   });
@@ -1600,10 +1880,15 @@
       renderComments();
     });
   }
+  if (lotteryTypeEl){
+    lotteryTypeEl.addEventListener("change", (e) => {
+      setMode(e.target.value);
+    });
+  }
 
   // ===== Init message =====
   initTheme();
-  clearUI(true);
+  setMode(lotteryTypeEl?.value || "kr");
   robot("대기 중… 1) RUN AI ANALYSIS 클릭");
   renderComments();
 })();
