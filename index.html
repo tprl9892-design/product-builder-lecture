@@ -811,6 +811,10 @@
       gap:16px;
       margin-bottom:16px;
     }
+    .headerActions{
+      display:flex;
+      align-items:center;
+    }
     .logo{
       display:flex;
       align-items:center;
@@ -830,35 +834,60 @@
       display:flex;
       flex-wrap:wrap;
       gap:10px;
+      align-items:center;
     }
-    .navLinks a{
+    .navLinks a,
+    .hubToggle{
       text-decoration:none;
       font-size:12px;
       color:var(--muted);
       border:1px solid var(--line);
-      padding:6px 10px;
+      padding:6px 12px;
       border-radius:999px;
-      background:rgba(0,0,0,0.2);
-      transition:transform .2s ease, color .2s ease, border .2s ease;
+      background:rgba(0,0,0,0.22);
+      transition:transform .2s ease, color .2s ease, border .2s ease, background .2s ease;
+      cursor:pointer;
     }
-    .navLinks a:hover{ transform:translateY(-1px); color:var(--fg); border-color:rgba(70,243,255,0.4); }
+    .navLinks a:hover,
+    .hubToggle:hover{ transform:translateY(-1px); color:var(--fg); border-color:rgba(70,243,255,0.4); }
+    .hubToggle{
+      color:var(--fg);
+      border-color:rgba(70,243,255,0.35);
+      background:rgba(70,243,255,0.08);
+      font-weight:700;
+    }
 
     .contentHub{
       margin-top:26px;
       padding:18px;
       border-radius:22px;
       border:1px solid var(--line);
-      background:linear-gradient(180deg, var(--glass), var(--glass2));
-      box-shadow: 0 18px 70px var(--panel-shadow);
+      background:linear-gradient(180deg, rgba(9,12,24,0.78), rgba(9,12,24,0.55));
+      box-shadow: 0 16px 60px rgba(0,0,0,0.45);
       position:relative;
       overflow:hidden;
     }
     .contentHub::before{
       content:"";
       position:absolute; inset:-2px;
-      background: linear-gradient(120deg, rgba(70,243,255,0.25), rgba(139,92,255,0.16), rgba(255,91,214,0.12));
-      filter: blur(24px);
-      opacity:.5;
+      background: linear-gradient(120deg, rgba(70,243,255,0.18), rgba(139,92,255,0.12), rgba(255,91,214,0.10));
+      filter: blur(28px);
+      opacity:.45;
+      pointer-events:none;
+    }
+    .contentBody{
+      position:relative;
+      z-index:1;
+      max-height:2000px;
+      opacity:1;
+      transform:translateY(0);
+      transition:max-height .4s ease, opacity .25s ease, transform .25s ease;
+    }
+    .contentBody.isCollapsed{
+      max-height:0;
+      opacity:0;
+      transform:translateY(-6px);
+      overflow:hidden;
       pointer-events:none;
     }
     .sectionHead{
@@ -887,14 +916,16 @@
       display:grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
       gap:16px;
+      margin-top:8px;
     }
     .sectionCard{
       grid-column: span 6;
-      background: rgba(0,0,0,0.25);
+      background: rgba(7,10,20,0.75);
       border:1px solid var(--line);
       border-radius:18px;
       padding:14px 16px;
       min-height:160px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
     .sectionCard.full{ grid-column: span 12; }
     .sectionCard h3{
@@ -916,7 +947,7 @@
       padding:6px 10px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,0.14);
-      background:rgba(0,0,0,0.25);
+      background:rgba(10,14,28,0.65);
       font-size:12px;
       color:var(--muted);
     }
@@ -929,7 +960,7 @@
       border:1px solid var(--line);
       border-radius:14px;
       padding:10px;
-      background:rgba(0,0,0,0.2);
+      background:rgba(10,14,28,0.6);
     }
     .metric b{ display:block; font-size:13px; }
     .metric span{ font-size:12px; color:var(--muted); }
@@ -950,7 +981,7 @@
       border:1px solid var(--line);
       border-radius:14px;
       padding:10px 12px;
-      background:rgba(0,0,0,0.2);
+      background:rgba(10,14,28,0.6);
     }
     .faqItem b, .policyItem b{ display:block; margin-bottom:6px; }
     .note{
@@ -1003,6 +1034,9 @@
     <div class="logo">
       <span class="logoBadge">LM</span>
       <span>LottoMind-AI</span>
+    </div>
+    <div class="headerActions">
+      <button id="hubToggle" class="hubToggle" type="button" aria-expanded="false">콘텐츠 허브 보기</button>
     </div>
     <nav class="navLinks" aria-label="빠른 이동">
       <a href="#analysis">분석 허브</a>
@@ -1180,20 +1214,21 @@
       <h2>콘텐츠 허브</h2>
       <p>검증 가능한 데이터 출처, 방법론, 책임 있는 이용 가이드와 FAQ를 한 곳에 정리했습니다. 본문 콘텐츠를 충분히 제공하여 광고가 노출되는 모든 화면에서 사용자에게 실질적인 정보를 전달합니다.</p>
     </div>
-    <div class="toc" aria-label="콘텐츠 목차">
-      <a href="#how">서비스 소개</a>
-      <a href="#data">데이터 출처</a>
-      <a href="#method">방법론</a>
-      <a href="#guide">이용 가이드</a>
-      <a href="#faq">FAQ</a>
-      <a href="#responsible">책임 있는 이용</a>
-      <a href="#policy">정책 요약</a>
-      <a href="#privacy">개인정보</a>
-      <a href="#terms">이용약관</a>
-      <a href="#changelog">변경 로그</a>
-    </div>
+    <div id="hubBody" class="contentBody isCollapsed">
+      <div class="toc" aria-label="콘텐츠 목차">
+        <a href="#how">서비스 소개</a>
+        <a href="#data">데이터 출처</a>
+        <a href="#method">방법론</a>
+        <a href="#guide">이용 가이드</a>
+        <a href="#faq">FAQ</a>
+        <a href="#responsible">책임 있는 이용</a>
+        <a href="#policy">정책 요약</a>
+        <a href="#privacy">개인정보</a>
+        <a href="#terms">이용약관</a>
+        <a href="#changelog">변경 로그</a>
+      </div>
 
-    <div class="sectionGrid">
+      <div class="sectionGrid">
       <article class="sectionCard" id="how">
         <h3>서비스 소개</h3>
         <p>LottoMind-AI는 로또/파워볼의 공개 기록을 기반으로 <b>빈도, 구간, 연속 패턴</b>을 요약하고, 해당 통계를 바탕으로
@@ -1316,6 +1351,7 @@
         </div>
         <div class="note" id="todayStamp">오늘 날짜 기준으로 자동 표기됩니다.</div>
       </article>
+      </div>
     </div>
   </section>
 
@@ -1457,6 +1493,8 @@
   const analysisCards = document.querySelectorAll(".analysisCard");
   const powerballCards = document.querySelectorAll(".powerballCard");
   const themeToggle = $("themeToggle");
+  const hubToggle = $("hubToggle");
+  const hubBody = $("hubBody");
 
   // HUD
   const hud = $("hud");
@@ -1472,6 +1510,8 @@
   const powerballLoader = $("powerballLoader");
 
   let dataCache = [];       // [{round, nums}]
+  let generatedCache = [];  // [{round, nums}] generated picks for live stats
+  let baseLastRound = 0;
   let weightsCache = null;  // 1..45 weights
   let pbDataCache = [];      // [{date, white, power}]
   let pbWeightsWhite = null; // 1..69 weights
@@ -1960,10 +2000,15 @@
   }
 
   // ===== Render =====
-  function renderAll(){
+  function getAnalysisData(){
+    return dataCache.concat(generatedCache);
+  }
+
+  function renderAll(options = {}){
+    const { preserveReco = false } = options;
     hotEl.innerHTML=""; coldEl.innerHTML=""; overdueEl.innerHTML=""; patternEl.innerHTML=""; kpiRow.innerHTML="";
     if (statusEl) statusEl.innerHTML="";
-    const data = dataCache;
+    const data = getAnalysisData();
     if (!data.length){
       recoEl.innerHTML = `<div class="muted">데이터가 없습니다. 먼저 수집을 실행하세요.</div>`;
       return;
@@ -1973,6 +2018,12 @@
     const first=data[0].round, last=data[data.length-1].round;
     const k1=document.createElement("div"); k1.className="kpi"; k1.innerHTML=`<span class="miniDot"></span><b>최신회차 분석완료</b>`;
     kpiRow.append(k1);
+    if (generatedCache.length){
+      const k2=document.createElement("div");
+      k2.className="kpi";
+      k2.innerHTML=`<span class="miniDot"></span><b>생성 반영</b><span class="muted">${generatedCache.length}회</span>`;
+      kpiRow.append(k2);
+    }
 
     // Analysis
     const freq=freqAnalysis(data);
@@ -2011,12 +2062,17 @@
       statusEl.appendChild(chip("최신 회차", latest));
       statusEl.appendChild(chip("가중치", "READY"));
       statusEl.appendChild(chip("데이터 소스", dataSourceLabel));
+      if (generatedCache.length){
+        statusEl.appendChild(chip("생성 반영", `${generatedCache.length}회 누적`));
+      }
       if (snapshotMeta?.updatedAt){
         statusEl.appendChild(chip("스냅샷 시각", new Date(snapshotMeta.updatedAt).toLocaleDateString()));
       }
     }
 
-    recoEl.innerHTML = `<div class="muted">준비 완료. <b>RELEASE ENERGY BURST</b>를 누르면 로봇이 계산합니다.</div>`;
+    if (!preserveReco){
+      recoEl.innerHTML = `<div class="muted">준비 완료. <b>RELEASE ENERGY BURST</b>를 누르면 로봇이 계산합니다.</div>`;
+    }
     btnGenerate.disabled = false;
   }
 
@@ -2063,8 +2119,10 @@
 
   function renderRecommendations(lines){
     recoEl.innerHTML = "";
+    const generated = [];
     for (let i=1;i<=lines;i++){
       const pick=weightedSampleUnique(weightsCache, 6, 45);
+      generated.push(pick);
       const box=document.createElement("div");
       box.className = "recoBox";
       box.style.marginBottom="10px";
@@ -2075,6 +2133,13 @@
       box.innerHTML = `<div class="mono muted">SET ${i} :: AI-Weighted Sampling</div>`;
       box.appendChild(balls(pick));
       recoEl.appendChild(box);
+    }
+    if (generated.length){
+      const start = baseLastRound + generatedCache.length + 1;
+      generated.forEach((nums, idx) => {
+        generatedCache.push({ round: start + idx, nums });
+      });
+      renderAll({ preserveReco: true });
     }
   }
 
@@ -2247,6 +2312,8 @@
       }
 
       dataCache = data;
+      generatedCache = [];
+      baseLastRound = Number(dataCache[dataCache.length - 1]?.round || dataCache.length || 0);
       robot("분석 준비 완료.");
       renderAll();
 
@@ -2384,6 +2451,17 @@
   if (lotteryTypeEl){
     lotteryTypeEl.addEventListener("change", (e) => {
       setMode(e.target.value);
+    });
+  }
+  if (hubToggle && hubBody){
+    hubToggle.addEventListener("click", () => {
+      const isOpen = !hubBody.classList.contains("isCollapsed");
+      hubBody.classList.toggle("isCollapsed", isOpen);
+      hubToggle.setAttribute("aria-expanded", String(!isOpen));
+      hubToggle.textContent = isOpen ? "콘텐츠 허브 보기" : "콘텐츠 허브 닫기";
+      if (!isOpen){
+        hubBody.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     });
   }
 
