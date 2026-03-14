@@ -528,6 +528,63 @@
       grid-template-columns: repeat(3, 1fr);
       gap:10px;
     }
+    .powerballLoader{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding:14px;
+      display:none;
+      align-items:center;
+      gap:12px;
+    }
+    .powerballLoader.isActive{ display:flex; }
+    .powerballBall{
+      width:56px;height:56px;border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff 0%, #ffdede 22%, #ff4a4a 55%, #a40000 100%);
+      box-shadow: 0 0 24px rgba(255,80,80,0.6), inset 0 0 12px rgba(255,255,255,0.4);
+      display:grid; place-items:center;
+      font-weight:900;
+      color:#220000;
+      animation: powerballSpin 1.1s linear infinite;
+      position:relative;
+      overflow:hidden;
+    }
+    .powerballBall::after{
+      content:"";
+      position:absolute; inset:8px;
+      border-radius:50%;
+      border:1px dashed rgba(255,255,255,0.65);
+      animation: powerballOrbit 1.6s linear infinite;
+    }
+    .powerballTrail{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .powerballTrail span{
+      width:8px;height:8px;border-radius:50%;
+      background:rgba(255,120,120,0.9);
+      box-shadow:0 0 10px rgba(255,80,80,0.8);
+      animation: powerballPulse 0.9s ease-in-out infinite;
+    }
+    .powerballTrail span:nth-child(2){ animation-delay:.15s; opacity:.8; }
+    .powerballTrail span:nth-child(3){ animation-delay:.3s; opacity:.6; }
+    .powerballLabel{
+      font-size:12px;
+      color:var(--muted);
+    }
+    @keyframes powerballSpin{
+      0%{ transform:rotate(0deg); }
+      100%{ transform:rotate(360deg); }
+    }
+    @keyframes powerballOrbit{
+      0%{ transform:rotate(0deg); }
+      100%{ transform:rotate(-360deg); }
+    }
+    @keyframes powerballPulse{
+      0%,100%{ transform:translateX(0); opacity:.6; }
+      50%{ transform:translateX(6px); opacity:1; }
+    }
     .miniCard{
       border-radius:18px;
       border:1px solid rgba(255,255,255,0.12);
@@ -1326,6 +1383,15 @@
 
       <div class="hudRight">
         <div class="hudConsole mono" id="hudConsole"></div>
+        <div class="powerballLoader" id="powerballLoader" aria-hidden="true">
+          <div class="powerballBall">PB</div>
+          <div class="powerballTrail">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="powerballLabel mono">POWERBALL SPINNING…</div>
+        </div>
         <div class="hudMini">
           <div class="miniCard">
             <div class="miniTitle mono">SIGNAL</div>
@@ -1399,9 +1465,11 @@
   const hudPct = $("hudPct");
   const hudStep = $("hudStep");
   const hudConsole = $("hudConsole");
+  const hudHint = $("hudHint");
   const sigEl = $("sig");
   const seedEl = $("seed");
   const hudFrame = $("hudFrame");
+  const powerballLoader = $("powerballLoader");
 
   let dataCache = [];       // [{round, nums}]
   let weightsCache = null;  // 1..45 weights
@@ -2046,10 +2114,17 @@
     hudPct.textContent="0%";
     hudStep.textContent="BOOTING…";
     hudConsole.textContent="";
+    setPowerballLoader(false);
   }
   function hudCloseNow(){
     hud.classList.add("hidden");
     hud.setAttribute("aria-hidden","true");
+    setPowerballLoader(false);
+  }
+  function setPowerballLoader(active){
+    if (!powerballLoader) return;
+    powerballLoader.classList.toggle("isActive", active);
+    powerballLoader.setAttribute("aria-hidden", active ? "false" : "true");
   }
   function hudLog(line){
     hudConsole.textContent += line + "\n";
@@ -2197,7 +2272,16 @@
     clearUI(true);
     btnGenerate.disabled = true;
     robot("Powerball 분석 준비 중…");
+    hudOpen();
+    hudFrame.classList.add("analyzing");
+    setPowerballLoader(true);
+    hudStep.textContent = "POWERBALL SPIN…";
+    hudHint.textContent = "파워볼 회전 시퀀스 활성화";
+    hudBar.style.width = "12%";
+    hudPct.textContent = "12%";
+    hudLog(`[${ROBOT}] POWERBALL CORE ONLINE`);
     try {
+      await sleep(280);
       let data = [];
       try {
         const snap = await loadPowerballSnapshot();
@@ -2206,10 +2290,15 @@
           data = await fetchRecentPowerballData(count);
           robot(`Powerball 스냅샷 로드 완료: ${snap.draws.length}회`);
           robot(`최근 ${count}회 분석 (${POWERBALL_FORMAT_START}+ 규격)`);
+          hudStep.textContent = "SNAPSHOT LOADED…";
+          hudBar.style.width = "48%";
+          hudPct.textContent = "48%";
+          hudLog(`[${ROBOT}] SNAPSHOT LOADED (${count})`);
         }
       } catch (err){
         const msg = err && err.message ? err.message : String(err);
         robot(`Powerball 스냅샷 실패: ${msg}`);
+        hudLog(`[${ROBOT}] SNAPSHOT ERROR: ${msg}`);
       }
 
       if (!data.length){
@@ -2222,16 +2311,29 @@
         }));
         robot("Powerball 스냅샷 없음 → 합성 데이터로 분석합니다.");
         robot(`합성 데이터 생성 완료 (seed=${seed})`);
+        hudStep.textContent = "SYNTHETIC SAMPLE…";
+        hudBar.style.width = "58%";
+        hudPct.textContent = "58%";
+        hudLog(`[${ROBOT}] SYNTHETIC DATA READY (seed=${seed})`);
         data = mock;
       }
 
       pbDataCache = data;
       renderPowerballAnalysis();
+      hudStep.textContent = "FINALIZING…";
+      hudBar.style.width = "100%";
+      hudPct.textContent = "100%";
+      hudLog(`[${ROBOT}] POWERBALL ANALYSIS COMPLETE`);
+      await sleep(360);
     } catch (err){
       const msg = err && err.message ? err.message : String(err);
       robot(`Powerball 분석 실패: ${msg}`);
       recoEl.innerHTML = `<div class="muted">Powerball 데이터를 불러오지 못했습니다.</div>`;
+      hudLog(`[${ROBOT}] POWERBALL ANALYSIS FAILED: ${msg}`);
     } finally {
+      setPowerballLoader(false);
+      hudFrame.classList.remove("analyzing");
+      hudCloseNow();
       btnGenerate.disabled = false;
     }
   }
