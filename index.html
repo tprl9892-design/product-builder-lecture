@@ -542,6 +542,231 @@
     :root[data-theme="dark"] .fortuneScore{
       background:rgba(240,253,244,0.12);
     }
+    .resultModal{
+      position:fixed;
+      inset:0;
+      z-index:10020;
+      display:grid;
+      place-items:center;
+      padding:18px;
+    }
+    .resultModal.hidden{ display:none; }
+    .resultBackdrop{
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(1200px 800px at 15% 10%, rgba(20,184,166,0.24), transparent 60%),
+        radial-gradient(1000px 700px at 85% 20%, rgba(56,189,248,0.18), transparent 60%),
+        rgba(248,250,252,0.84);
+      backdrop-filter: blur(14px);
+    }
+    .resultFrame{
+      position:relative;
+      width:min(940px, 100%);
+      max-height:min(92vh, 980px);
+      overflow:auto;
+      border-radius:30px;
+      border:1px solid rgba(20,184,166,0.18);
+      background:
+        radial-gradient(circle at top left, rgba(187,247,208,0.3), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0.99), rgba(240,253,250,0.94));
+      box-shadow: 0 32px 80px rgba(15,23,42,0.18);
+      padding:22px;
+    }
+    .resultHead{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+      margin-bottom:18px;
+    }
+    .resultEyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 11px;
+      border-radius:999px;
+      border:1px solid rgba(20,184,166,0.22);
+      background:rgba(255,255,255,0.7);
+      color:#0f766e;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+    .resultEyebrow::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#22c55e;
+      box-shadow:0 0 12px rgba(34,197,94,0.55);
+    }
+    .resultTitle{
+      margin:12px 0 6px;
+      font-size:34px;
+      line-height:1.04;
+      font-family:"Sora","Noto Sans KR",system-ui,sans-serif;
+      letter-spacing:-0.03em;
+      color:#0f172a;
+    }
+    .resultDesc{
+      margin:0;
+      color:#475569;
+      font-size:14px;
+      line-height:1.6;
+    }
+    .resultClose{
+      border:1px solid rgba(20,184,166,0.18);
+      background:rgba(255,255,255,0.76);
+      color:#0f172a;
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      cursor:pointer;
+      font-size:18px;
+      font-weight:700;
+    }
+    .resultClose:hover{ filter:brightness(1.03); }
+    .resultGrid{
+      display:grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+      gap:16px;
+      align-items:start;
+    }
+    .resultMainCard,
+    .resultSideCard{
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:18px;
+      background:rgba(255,255,255,0.78);
+      box-shadow: 0 12px 26px rgba(15,23,42,0.06);
+    }
+    .resultWish{
+      margin:0 0 14px;
+      padding:14px 16px;
+      border-radius:20px;
+      background:
+        radial-gradient(circle at top left, rgba(254,240,138,0.55), transparent 32%),
+        linear-gradient(135deg, rgba(255,251,235,0.96), rgba(236,253,245,0.92));
+      border:1px solid rgba(250,204,21,0.24);
+      color:#854d0e;
+      font-size:14px;
+      line-height:1.6;
+      font-weight:700;
+    }
+    .resultTickets{
+      display:grid;
+      gap:12px;
+    }
+    .resultTicket{
+      border-radius:22px;
+      padding:16px;
+      border:1px solid rgba(20,184,166,0.16);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.98), rgba(240,253,250,0.92));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.48);
+    }
+    .resultTicketHead{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    .resultSet{
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:0.08em;
+      color:#0f766e;
+      text-transform:uppercase;
+    }
+    .resultTag{
+      font-size:11px;
+      color:#64748b;
+      font-weight:700;
+    }
+    .resultNums{
+      justify-content:flex-start;
+      gap:10px;
+      margin-top:0;
+    }
+    .resultNums .ball{
+      width:56px;
+      height:56px;
+      font-size:19px;
+      color:#f8fafc;
+      box-shadow:
+        0 16px 34px rgba(15,23,42,0.26),
+        0 0 0 1px rgba(255,255,255,0.16) inset,
+        0 8px 16px rgba(255,255,255,0.08) inset;
+      background:
+        radial-gradient(14px 14px at 28% 24%, rgba(255,255,255,0.92), transparent 62%),
+        radial-gradient(24px 20px at 72% 78%, rgba(0,0,0,0.32), transparent 66%),
+        linear-gradient(180deg, #22c55e, #0f766e 56%, #072f2b);
+    }
+    .resultNums .ball.powerball{
+      background:
+        radial-gradient(14px 14px at 28% 24%, rgba(255,255,255,0.92), transparent 62%),
+        radial-gradient(24px 20px at 72% 78%, rgba(0,0,0,0.28), transparent 66%),
+        linear-gradient(180deg, #fb7185, #e11d48 56%, #4c0519);
+    }
+    .resultModal .fortuneBadge{
+      width:100%;
+      max-width:none;
+    }
+    .resultCaption{
+      margin:14px 0 0;
+      font-size:12px;
+      color:#64748b;
+      line-height:1.6;
+    }
+    @media (max-width:900px){
+      .resultGrid{ grid-template-columns:1fr; }
+      .resultTitle{ font-size:28px; }
+      .resultNums{ justify-content:center; }
+      .resultTicketHead{ flex-direction:column; align-items:flex-start; }
+    }
+    :root[data-theme="dark"] .resultBackdrop{
+      background:
+        radial-gradient(1200px 800px at 15% 10%, rgba(20,184,166,0.18), transparent 60%),
+        radial-gradient(1000px 700px at 85% 20%, rgba(56,189,248,0.16), transparent 60%),
+        rgba(2,6,23,0.76);
+    }
+    :root[data-theme="dark"] .resultFrame{
+      border-color: rgba(45,212,191,0.18);
+      background:
+        radial-gradient(circle at top left, rgba(20,184,166,0.14), transparent 28%),
+        linear-gradient(180deg, rgba(15,23,42,0.96), rgba(8,47,73,0.9));
+      box-shadow: 0 32px 80px rgba(0,0,0,0.42);
+    }
+    :root[data-theme="dark"] .resultTitle,
+    :root[data-theme="dark"] .resultClose{
+      color:#f8fafc;
+    }
+    :root[data-theme="dark"] .resultDesc,
+    :root[data-theme="dark"] .resultTag,
+    :root[data-theme="dark"] .resultCaption{
+      color:#cbd5e1;
+    }
+    :root[data-theme="dark"] .resultMainCard,
+    :root[data-theme="dark"] .resultSideCard,
+    :root[data-theme="dark"] .resultClose{
+      background:rgba(15,23,42,0.72);
+      border-color:rgba(148,163,184,0.14);
+    }
+    :root[data-theme="dark"] .resultWish{
+      background:
+        radial-gradient(circle at top left, rgba(250,204,21,0.18), transparent 32%),
+        linear-gradient(135deg, rgba(69,26,3,0.42), rgba(20,83,45,0.32));
+      border-color: rgba(250,204,21,0.18);
+      color:#fde68a;
+    }
+    :root[data-theme="dark"] .resultTicket{
+      background:linear-gradient(135deg, rgba(15,23,42,0.82), rgba(15,118,110,0.16));
+      border-color:rgba(45,212,191,0.14);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
     .muted{color:var(--muted);font-size:13px}
     .log{
       height:210px; overflow:auto; white-space:pre-wrap;
@@ -1814,6 +2039,30 @@
   </div>
 </div>
 
+<div id="resultModal" class="resultModal hidden" aria-hidden="true">
+  <div class="resultBackdrop"></div>
+  <div class="resultFrame" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="resultHead">
+      <div>
+        <div id="resultEyebrow" class="resultEyebrow">Lucky Result Window</div>
+        <h2 id="resultTitle" class="resultTitle">대박기원 추천 번호</h2>
+        <p id="resultDesc" class="resultDesc">최신 스냅샷 기반으로 정리한 참고용 조합입니다.</p>
+      </div>
+      <button id="resultClose" class="resultClose" type="button" aria-label="결과 창 닫기">✕</button>
+    </div>
+    <div class="resultGrid">
+      <div class="resultMainCard">
+        <p class="resultWish">오늘의 대박기원. 너무 많은 줄보다 손에 꽂히는 조합 몇 줄만 차분히 보세요.</p>
+        <div id="resultTickets" class="resultTickets"></div>
+      </div>
+      <div class="resultSideCard">
+        <div id="resultFortune"></div>
+        <p class="resultCaption">추천 번호는 통계 기반 참고용 샘플링 결과입니다. 실제 구매 판단은 본인 책임으로 진행하세요.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 (() => {
   // ===== Config =====
@@ -1874,6 +2123,13 @@
   const seedEl = $("seed");
   const hudFrame = $("hudFrame");
   const powerballLoader = $("powerballLoader");
+  const resultModal = $("resultModal");
+  const resultClose = $("resultClose");
+  const resultEyebrow = $("resultEyebrow");
+  const resultTitleEl = $("resultTitle");
+  const resultDescEl = $("resultDesc");
+  const resultTicketsEl = $("resultTickets");
+  const resultFortuneEl = $("resultFortune");
 
   let dataCache = [];       // [{round, nums}]
   let generatedCache = [];  // [{round, nums}] generated picks for live stats
@@ -2103,6 +2359,51 @@
       <div class="fortuneMeta">${(fortune.meta || []).map((item) => `<span>${item}</span>`).join("")}</div>
     `;
     return badge;
+  }
+  function createResultTicket(label, nums, mode){
+    const card = document.createElement("div");
+    card.className = "resultTicket";
+    const head = document.createElement("div");
+    head.className = "resultTicketHead";
+    head.innerHTML = `
+      <span class="resultSet">${label}</span>
+      <span class="resultTag">${mode === "powerball" ? "White 5 + Power 1" : "K-Lotto 6/45"}</span>
+    `;
+    const wrap = balls(nums);
+    wrap.classList.add("resultNums");
+    if (mode === "powerball"){
+      const lastBall = wrap.lastElementChild;
+      if (lastBall) lastBall.classList.add("powerball");
+    }
+    card.appendChild(head);
+    card.appendChild(wrap);
+    return card;
+  }
+  function populateResultModal({ mode, lines, fortune }){
+    if (!resultModal || !resultTicketsEl || !resultFortuneEl) return;
+    resultEyebrow.textContent = mode === "powerball" ? "Powerball Result Window" : "K-Lotto Result Window";
+    resultTitleEl.textContent = mode === "powerball" ? "대박기원 파워볼 추천 번호" : "대박기원 로또 추천 번호";
+    resultDescEl.textContent = mode === "powerball"
+      ? "최신 Powerball 스냅샷을 바탕으로 정리한 5+1 참고 조합입니다."
+      : "최신 K-Lotto 스냅샷을 바탕으로 정리한 참고용 추천 조합입니다.";
+    resultTicketsEl.innerHTML = "";
+    resultFortuneEl.innerHTML = "";
+    lines.forEach((nums, idx) => {
+      resultTicketsEl.appendChild(createResultTicket(`SET ${idx + 1}`, nums, mode));
+    });
+    resultFortuneEl.appendChild(createFortuneBadge(fortune));
+  }
+  function openResultModal(){
+    if (!resultModal) return;
+    resultModal.classList.remove("hidden");
+    resultModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+  function closeResultModal(){
+    if (!resultModal) return;
+    resultModal.classList.add("hidden");
+    resultModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
   }
 
   function sampleUnique(max, count){
@@ -2530,8 +2831,6 @@
 
     // KPIs
     const first=data[0].round, last=data[data.length-1].round;
-    kpiRow.append(createSnapshotKpiCard(snapshotMeta));
-    kpiRow.append(createAnalysisRangeKpi(data));
     const k1=document.createElement("div"); k1.className="kpi"; k1.innerHTML=`<span class="miniDot"></span><b>최신회차 분석완료</b>`;
     kpiRow.append(k1);
     if (generatedCache.length){
@@ -2587,7 +2886,7 @@
     }
 
     if (!preserveReco){
-      recoEl.innerHTML = `<div class="muted">준비 완료. <b>RELEASE ENERGY BURST</b>를 누르면 로봇이 계산합니다.</div>`;
+      recoEl.innerHTML = `<div class="muted">준비 완료. <b>RUN AI ANALYSIS</b>를 누르면 결과 창에서 추천 번호를 확인할 수 있습니다.</div>`;
     }
     btnGenerate.disabled = false;
   }
@@ -2634,29 +2933,17 @@
   }
 
   function renderRecommendations(lines){
-    recoEl.innerHTML = "";
+    recoEl.innerHTML = `<div class="muted">결과 창이 열렸습니다. 창을 닫으면 이 자리에서는 다시 안내 문구만 보입니다.</div>`;
     const generated = [];
-    const fortunePanel = document.createElement("div");
-    fortunePanel.className = "fortunePanel";
     for (let i=1;i<=lines;i++){
       const pick=weightedSampleUnique(weightsCache, 6, 45);
       generated.push(pick);
-      const box=document.createElement("div");
-      box.className = "recoBox";
-      box.style.marginBottom="10px";
-      box.style.borderRadius="18px";
-      box.style.border="1px solid rgba(255,255,255,0.10)";
-      box.style.background="rgba(255,255,255,0.03)";
-      box.style.padding="12px";
-      const main = document.createElement("div");
-      main.className = "recoMain";
-      main.innerHTML = `<div class="mono muted">SET ${i} :: AI-Weighted Sampling</div>`;
-      main.appendChild(balls(pick));
-      box.appendChild(main);
-      recoEl.appendChild(box);
     }
-    fortunePanel.appendChild(createFortuneBadge(buildMoneyFortune(generated, "kr")));
-    recoEl.prepend(fortunePanel);
+    populateResultModal({
+      mode: "kr",
+      lines: generated,
+      fortune: buildMoneyFortune(generated, "kr"),
+    });
     if (generated.length){
       const start = baseLastRound + generatedCache.length + 1;
       generated.forEach((nums, idx) => {
@@ -2667,10 +2954,8 @@
   }
 
   function renderPowerballRecommendations(lines){
-    recoEl.innerHTML = "";
+    recoEl.innerHTML = `<div class="muted">결과 창이 열렸습니다. 창을 닫으면 이 자리에서는 다시 안내 문구만 보입니다.</div>`;
     const generated = [];
-    const fortunePanel = document.createElement("div");
-    fortunePanel.className = "fortunePanel";
     for (let i=1;i<=lines;i++){
       const whites = pbWeightsWhite
         ? weightedSampleUnique(pbWeightsWhite, 5, 69)
@@ -2678,29 +2963,14 @@
       const power = pbWeightsRed
         ? weightedSampleOne(pbWeightsRed, 26)
         : 1 + Math.floor(Math.random() * 26);
-      const box=document.createElement("div");
-      box.className = "recoBox";
-      box.style.marginBottom="10px";
-      box.style.borderRadius="18px";
-      box.style.border="1px solid rgba(255,255,255,0.10)";
-      box.style.background="rgba(255,255,255,0.03)";
-      box.style.padding="12px";
-      const main = document.createElement("div");
-      main.className = "recoMain";
-      main.innerHTML = `<div class="mono muted">SET ${i} :: Powerball Weighted</div>`;
-      const wrap = balls(whites);
-      const pb = document.createElement("div");
-      pb.className = "ball powerball";
-      pb.textContent = power;
-      pb.style.animationDelay = `${whites.length * 0.08}s`;
-      wrap.appendChild(pb);
       generated.push([...whites, power]);
-      main.appendChild(wrap);
-      box.appendChild(main);
-      recoEl.appendChild(box);
     }
-    fortunePanel.appendChild(createFortuneBadge(buildMoneyFortune(generated, "powerball")));
-    recoEl.prepend(fortunePanel);
+    populateResultModal({
+      mode: "powerball",
+      lines: generated,
+      fortune: buildMoneyFortune(generated, "powerball"),
+    });
+    openResultModal();
   }
 
   // ===== HUD =====
@@ -2730,6 +3000,20 @@
   hudClose.addEventListener("click", hudCloseNow);
   hud.addEventListener("click", (e)=>{
     if (e.target === hud || e.target.classList.contains("hudBg")) hudCloseNow();
+  });
+  if (resultClose){
+    resultClose.addEventListener("click", closeResultModal);
+  }
+  if (resultModal){
+    resultModal.addEventListener("click", (e) => {
+      if (e.target === resultModal || e.target.classList.contains("resultBackdrop")) closeResultModal();
+    });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape"){
+      if (resultModal && !resultModal.classList.contains("hidden")) closeResultModal();
+      else if (hud && !hud.classList.contains("hidden")) hudCloseNow();
+    }
   });
 
   async function runRobotCompute(lines){
@@ -2784,6 +3068,7 @@
     hudLog(`[${ROBOT}] Ticket lines delivered.`);
     await sleep(360);
     hudCloseNow();
+    openResultModal();
   }
 
   async function prepareAnalysis(){
