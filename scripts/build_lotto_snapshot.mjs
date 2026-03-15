@@ -1,14 +1,18 @@
 const API_BASE = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=";
+const FALLBACK_ALL_URL = "https://smok95.github.io/lotto/results/all.json";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function fetchDraw(n){
-  const res = await fetch(`${API_BASE}${n}`, { cache: "no-store" });
+async function fetchJson(url){
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  return data;
+  return res.json();
 }
 
-async function main(){
+async function fetchDraw(n){
+  return fetchJson(`${API_BASE}${n}`);
+}
+
+async function fetchOfficialDraws(){
   const draws = [];
   let n = 1;
   let failures = 0;
@@ -34,14 +38,53 @@ async function main(){
     n += 1;
     if (n % 50 === 0) await sleep(250);
   }
+  return {
+    source: "dhlottery.co.kr/common.do?method=getLottoNumber",
+    draws,
+  };
+}
 
+async function fetchFallbackDraws(){
+  const rows = await fetchJson(FALLBACK_ALL_URL);
+  if (!Array.isArray(rows)) throw new Error("Fallback source returned invalid data");
+  const draws = rows
+    .map((row) => {
+      const round = Number(row.draw_no);
+      const nums = Array.isArray(row.numbers)
+        ? row.numbers.map(Number).filter(Number.isFinite).sort((a, b) => a - b)
+        : [];
+      const bonus = Number(row.bonus_no);
+      const date = row.date ? String(row.date).slice(0, 10) : null;
+      if (!round || nums.length !== 6 || !Number.isFinite(bonus) || !date) return null;
+      return { round, date, nums, bonus };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.round - b.round);
+  return {
+    source: "smok95.github.io/lotto/results/all.json",
+    draws,
+  };
+}
+
+async function loadDraws(){
+  try {
+    return await fetchOfficialDraws();
+  } catch (error) {
+    console.warn(`Official lotto source failed: ${error.message || error}`);
+    return fetchFallbackDraws();
+  }
+}
+
+async function main(){
+  const { source, draws } = await loadDraws();
   const payload = {
     updatedAt: new Date().toISOString(),
+    source,
     draws,
   };
   const fs = await import("node:fs");
   fs.writeFileSync("data/lotto_draws.json", JSON.stringify(payload, null, 2));
-  console.log(`Saved ${draws.length} draws`);
+  console.log(`Saved ${draws.length} draws from ${source}`);
 }
 
 main().catch((err) => {
