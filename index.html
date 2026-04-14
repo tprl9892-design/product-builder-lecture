@@ -2,3314 +2,846 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="description" content="LottoMind-AI는 공개 데이터와 통계 요약을 기반으로 로또/파워볼 번호 패턴을 설명하고, 가중치 샘플링 결과를 참고용으로 제공합니다. 자료 출처, 방법론, 책임 있는 이용 가이드와 FAQ를 포함합니다.">
-  <meta name="google-adsense-account" content="ca-pub-2281703072786388">
-  <title>LottoMind-AI | FUTURE HUD</title>
-  <!-- Google tag (gtag.js) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Open Pattern Lab은 동전 던지기, 주사위 분포, 랜덤 워크 같은 확률 실험을 브라우저에서 직접 실행하고 결과를 해설하는 교육형 데이터 페이지입니다. 방법론, 운영 정보, 광고 및 쿠키 안내, 개인정보처리방침을 함께 제공합니다." />
+  <meta name="google-adsense-account" content="ca-pub-2281703072786388" />
+  <title>Open Pattern Lab | Probability Playground</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DM0PRVSB37"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-DM0PRVSB37');
   </script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2281703072786388"
-     crossorigin="anonymous"></script>
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap");
+  <script>
+    window.adsbygoogle = window.adsbygoogle || [];
+    window.adsbygoogle.requestNonPersonalizedAds = 1;
+  </script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2281703072786388" crossorigin="anonymous"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap");
+
     :root{
-      --bg:#f7f8fb;
-      --fg:#0f172a;
-      --muted:#667085;
-      --line:rgba(15,23,42,0.12);
-      --glass:rgba(255,255,255,0.92);
-      --glass2:rgba(255,255,255,0.78);
-      --neon:#14b8a6;
-      --neon2:#0ea5a0;
-      --hot:#ff6b6b;
-      --ok:#22c55e;
-      --pill-bg: rgba(255,255,255,0.9);
-      --input-bg:#ffffff;
-      --panel-shadow: rgba(15,23,42,0.08);
-      --bg-grad-1: radial-gradient(1200px 800px at 18% 0%, rgba(20,184,166,0.12), transparent 60%);
-      --bg-grad-2: radial-gradient(1000px 700px at 85% 18%, rgba(59,130,246,0.08), transparent 60%);
-      --bg-grad-3: radial-gradient(900px 700px at 40% 90%, rgba(251,191,36,0.10), transparent 60%);
+      --bg:#f4f7fb;
+      --bg-soft:#edf2f8;
+      --panel:#ffffff;
+      --ink:#122033;
+      --muted:#5f6f84;
+      --line:rgba(18,32,51,.12);
+      --accent:#126e82;
+      --accent-2:#ecb365;
+      --accent-3:#4c7b8b;
+      --ok:#1f9d75;
+      --warn:#d97706;
+      --shadow:0 24px 60px rgba(18,32,51,.10);
+      --radius:22px;
     }
-    :root[data-theme="dark"]{
-      --bg:#0b0f16;
-      --fg:#e6edf7;
-      --muted:#9aa7bf;
-      --line:rgba(255,255,255,0.12);
-      --glass:rgba(20,24,34,0.72);
-      --glass2:rgba(20,24,34,0.55);
-      --pill-bg: rgba(15,18,28,0.7);
-      --input-bg:#0f1422;
-      --panel-shadow: rgba(0,0,0,0.55);
-      --bg-grad-1: radial-gradient(1200px 800px at 18% 0%, rgba(20,184,166,0.14), transparent 60%);
-      --bg-grad-2: radial-gradient(1000px 700px at 85% 18%, rgba(56,189,248,0.12), transparent 60%);
-      --bg-grad-3: radial-gradient(900px 700px at 40% 90%, rgba(59,130,246,0.10), transparent 60%);
-    }
+
     *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     body{
       margin:0;
-      color:var(--fg);
-      font-family:"Sora","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      font-family:"IBM Plex Sans KR", system-ui, sans-serif;
+      color:var(--ink);
       background:
-        var(--bg-grad-1),
-        var(--bg-grad-2),
-        var(--bg-grad-3),
-        var(--bg);
-      overflow-x:hidden;
+        radial-gradient(1000px 700px at 0% 0%, rgba(18,110,130,.10), transparent 60%),
+        radial-gradient(900px 600px at 100% 10%, rgba(236,179,101,.14), transparent 55%),
+        linear-gradient(180deg, #f8fbff 0%, #edf3f8 100%);
     }
 
-    /* Animated stars canvas sits behind everything */
-    #bgFx{
-      position:fixed; inset:0;
-      z-index:-1;
-      width:100%; height:100%;
-    }
-
-    .wrap{max-width:1180px;margin:0 auto;padding:22px 18px 40px;}
-    .top{
-      display:flex; gap:16px; flex-wrap:wrap; align-items:stretch;
-    }
-    .panel{
-      flex:1; min-width:320px;
-      border-radius:22px;
-      border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
-      box-shadow: 0 18px 60px var(--panel-shadow);
-      overflow:hidden;
-      position:relative;
-    }
-    .panel::before{
-      content:"";
-      position:absolute; inset:-2px;
-      background: linear-gradient(120deg, rgba(20,184,166,0.18), rgba(59,130,246,0.10), rgba(251,191,36,0.12));
-      filter: blur(22px);
-      opacity: .25;
-      pointer-events:none;
-    }
-    .panelHead{
-      padding:16px 16px 0;
-      position:relative;
-      z-index:1;
-    }
-    .brandRow{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    }
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:6px 10px; border-radius:999px;
-      border:1px solid rgba(15,23,42,0.12);
-      background: rgba(20,184,166,0.08);
-      font-size:12px; color:var(--fg);
-      font-weight:600;
-      box-shadow: 0 0 0 1px rgba(20,184,166,0.06) inset;
-    }
-    .dot{
-      width:9px;height:9px;border-radius:50%;
-      background:var(--neon);
-      box-shadow: 0 0 12px rgba(20,184,166,0.55);
-      animation:pulseDot 1.3s infinite;
-    }
-    @keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.75}}
-
-    h1{
-      margin:10px 0 6px;
-      font-size:20px;
-      letter-spacing:0.2px;
-    }
-    h1, h2, .badge, .megaBtn{
-      font-family:"Sora","Noto Sans KR",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      letter-spacing:0.2px;
-    }
-    .desc{
-      margin:0 0 12px;
-      color:var(--muted);
-      font-size:14px; line-height:1.65;
-    }
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-
-    .controls{
-      display:flex; gap:10px; flex-wrap:wrap;
-      padding:0 16px 16px;
-      position:relative;
-      z-index:1;
-    }
-    .pill{
-      display:flex; align-items:center; gap:8px;
-      padding:10px 12px;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background: var(--pill-bg);
-      color:var(--muted);
-      font-size:12px;
-    }
-    .pill.themeBtn{
-      border:1px solid var(--line);
-      color:var(--fg);
-      cursor:pointer;
-      appearance:none;
-    }
-    .pill.themeBtn:hover{ filter:brightness(1.06); }
-    select{
-      background:var(--input-bg); color:var(--fg);
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px 10px;
-      outline:none;
-    }
-    .fortuneControls{
-      width:100%;
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap:10px;
-      align-items:stretch;
-    }
-    .fortunePill{
+    a{color:var(--accent)}
+    .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 60px}
+    .topbar{
       display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:6px;
-    }
-    .fortunePill span{
-      font-size:12px;
-      color:var(--muted);
-    }
-    .fortunePill input,
-    .fortunePill select{
-      width:100%;
-    }
-    .fortuneHint{
-      width:100%;
-      margin-top:2px;
-      padding-left:4px;
-      font-size:12px;
-      color:var(--muted);
-    }
-    @media (max-width:900px){
-      .fortuneControls{
-        grid-template-columns:repeat(2, minmax(0, 1fr));
-      }
-    }
-    @media (max-width:640px){
-      .fortuneControls{
-        grid-template-columns:1fr;
-      }
-    }
-    .formGrid{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      justify-content:space-between;
+      align-items:center;
       gap:16px;
+      padding:12px 0 20px;
     }
-    .formGrid.formSplit > div{
-      padding:0 8px;
-    }
-    .formGrid.formSplit > div:first-child{
-      border-right:1px solid var(--line);
-      padding-right:16px;
-    }
-    :root[data-theme="dark"] .formGrid.formSplit > div:first-child{
-      border-right-color: rgba(255,255,255,0.14);
-    }
-    @media (max-width:900px){
-      .formGrid{ grid-template-columns:1fr; }
-      .formGrid.formSplit > div{
-        padding:0;
-        border-right:0;
-      }
-    }
-    .formField{
+    .brand{
       display:flex;
-      flex-direction:column;
-      gap:6px;
-      margin-bottom:12px;
-    }
-    .formField label{
-      font-size:12px;
-      color:var(--muted);
-    }
-    .formField input,
-    .formField textarea{
-      background:var(--input-bg);
-      color:var(--fg);
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px 12px;
-      outline:none;
-      font-size:13px;
-    }
-    .formField textarea{ min-height:110px; resize:vertical; }
-    .formBtn{
-      width:100%;
-      border:1px solid rgba(20,184,166,0.45);
-      border-radius:12px;
-      padding:12px 14px;
-      color:#ffffff;
-      background:linear-gradient(180deg, rgba(20,184,166,0.98), rgba(15,118,110,0.98));
-      cursor:pointer;
+      align-items:center;
+      gap:12px;
+      font-family:"Space Grotesk", sans-serif;
       font-weight:700;
+      letter-spacing:.2px;
     }
-    .formBtn:hover{ filter:brightness(1.05); }
-    .commentList{
-      margin-top:12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+    .brandMark{
+      width:40px;height:40px;border-radius:14px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg, var(--accent), var(--accent-3));
+      color:#fff;
+      box-shadow:var(--shadow);
     }
-    .commentActions{
-      display:flex;
-      justify-content:flex-end;
-      margin-top:10px;
-    }
-    .commentItem{
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px 12px;
-      background:rgba(255,255,255,0.85);
-    }
-    .commentMeta{
-      display:flex;
-      justify-content:space-between;
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
-    .commentBody{ font-size:13px; color:var(--fg); line-height:1.4; }
-    .commentDelete{
-      border:1px solid var(--line);
-      background: rgba(255,255,255,0.8);
-      color:var(--fg);
-      border-radius:10px;
-      padding:6px 10px;
-      font-size:12px;
-      cursor:pointer;
-    }
-    .commentDelete:hover{ filter:brightness(1.05); }
-
-    /* ===== MEGA BUTTON (energy burst) ===== */
-    .megaBtn{
-      flex:1;
-      min-width:280px;
-      position:relative;
-      border:0;
-      border-radius:18px;
-      padding:16px 16px;
-      cursor:pointer;
-      color:#ffffff;
-      font-weight:900;
-      letter-spacing:0.2px;
-      text-transform:uppercase;
-      background:
-        linear-gradient(180deg, rgba(20,184,166,0.98), rgba(15,118,110,0.98));
-      border:1px solid rgba(20,184,166,0.45);
-      box-shadow:
-        0 16px 40px rgba(15,23,42,0.18),
-        0 8px 20px rgba(20,184,166,0.25);
-      overflow:hidden;
-      transform: translateZ(0);
-    }
-    .megaBtn .sub{
-      display:block;
-      margin-top:6px;
-      font-size:12px;
-      color:rgba(255,255,255,0.85);
-      font-weight:600;
-      text-transform:none;
-      letter-spacing:0;
-    }
-    .megaBtn::before{
-      content:"";
-      position:absolute; inset:-2px;
-      background: linear-gradient(120deg, rgba(255,255,255,0.18), transparent 40%, rgba(255,255,255,0.12));
-      filter: blur(8px);
-      opacity:.5;
-      animation: shimmerBand 2.8s linear infinite;
-    }
-    @keyframes shimmerBand { 0%{transform:translateX(-60%)} 100%{transform:translateX(60%)} }
-    .megaBtn::after{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transform: translateX(-140%);
-      transition: transform .45s ease;
-      opacity:.65;
-      pointer-events:none;
-    }
-    .megaBtn:hover::after{ transform: translateX(140%); }
-    .megaBtn:active{ transform: scale(0.985); }
-    .megaBtn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.75); }
-
-    /* Energy sparks on button press */
-    .spark{
-      position:absolute;
-      width:10px; height:10px;
-      border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,0) 60%),
-                  radial-gradient(circle at 50% 50%, rgba(20,184,166,1), rgba(20,184,166,0) 70%);
-      box-shadow: 0 0 18px rgba(20,184,166,0.8), 0 0 24px rgba(56,189,248,0.5);
-      pointer-events:none;
-      animation: sparkFly .7s ease-out forwards;
-    }
-    @keyframes sparkFly{
-      to{
-        transform: translate(var(--dx), var(--dy)) scale(0.2);
-        opacity:0;
-      }
-    }
-
-    /* ===== layout cards ===== */
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:14px}
-    .card{
-      grid-column:span 12;
-      border-radius:20px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,0.98);
-      padding:14px;
-      box-shadow: 0 12px 30px rgba(15,23,42,0.08);
-    }
-    @media (min-width:980px){
-      .c6{grid-column:span 6}
-      .c4{grid-column:span 4}
-    }
-    .card h2{margin:0 0 10px;font-size:14px; letter-spacing:.2px;}
-    .chips{display:flex;flex-wrap:wrap;gap:7px}
-    .chip{
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background: rgba(15,23,42,0.04);
-      font-size:12px;
-      box-shadow: 0 0 0 1px rgba(20,184,166,0.05) inset;
-    }
-    .recoBox{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      text-align:left;
-    }
-    .recoMain{
-      flex:1;
-      min-width:0;
-    }
-    .fortuneBadge{
-      position:relative;
-      width:min(320px, 100%);
-      padding:18px 18px 18px 72px;
-      border-radius:24px;
-      border:1px solid rgba(34,197,94,0.24);
-      background:
-        radial-gradient(circle at 18% 22%, rgba(255,255,255,0.94), rgba(255,255,255,0) 28%),
-        linear-gradient(135deg, rgba(236,253,245,0.96), rgba(220,252,231,0.92) 45%, rgba(254,249,195,0.9));
-      box-shadow:
-        0 12px 26px rgba(22,101,52,0.12),
-        inset 0 0 0 1px rgba(255,255,255,0.52);
-      overflow:hidden;
-    }
-    .fortuneBadge::before{
-      content:"";
-      position:absolute;
-      left:20px;
-      top:50%;
-      width:34px;
-      height:34px;
-      transform:translateY(-50%) rotate(45deg);
-      border-radius:8px 0 8px 0;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.88), rgba(255,255,255,0) 58%),
-        linear-gradient(180deg, #4ade80, #16a34a);
-      box-shadow:
-        22px 0 0 0 rgba(34,197,94,0.92),
-        0 22px 0 0 rgba(74,222,128,0.92),
-        22px 22px 0 0 rgba(22,163,74,0.94);
-    }
-    .fortuneBadge::after{
-      content:"";
-      position:absolute;
-      left:42px;
-      top:calc(50% + 12px);
-      width:3px;
-      height:28px;
-      background:linear-gradient(180deg, rgba(22,163,74,0.95), rgba(21,128,61,0.55));
-      border-radius:999px;
-      transform:translateX(-50%);
-    }
-    .fortuneTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      margin-bottom:4px;
-    }
-    .fortuneTag{
-      font-size:11px;
-      font-weight:800;
-      color:#166534;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-    }
-    .fortuneScore{
-      display:inline-flex;
-      align-items:center;
-      padding:4px 8px;
-      border-radius:999px;
-      background:rgba(21,128,61,0.12);
-      color:#166534;
-      font-size:11px;
-      font-weight:800;
-    }
-    .fortuneLevel{
-      font-size:22px;
-      font-weight:800;
-      color:#14532d;
-      margin:0 0 4px;
-    }
-    .fortuneCopy{
-      margin:0;
+    .nav{
+      display:flex;flex-wrap:wrap;gap:10px 14px;
       font-size:14px;
-      line-height:1.55;
-      color:#365314;
     }
-    .fortuneMeta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin:10px 0 0;
-    }
-    .fortuneMeta span{
-      display:inline-flex;
-      align-items:center;
-      padding:5px 9px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.45);
-      border:1px solid rgba(21,128,61,0.14);
-      color:#166534;
-      font-size:11px;
-      font-weight:700;
-    }
-    .fortunePanel{
-      margin-bottom:14px;
-      padding:16px;
-      border-radius:22px;
-      border:1px solid rgba(34,197,94,0.2);
-      background:
-        radial-gradient(circle at top left, rgba(187,247,208,0.32), transparent 32%),
-        linear-gradient(135deg, rgba(240,253,244,0.9), rgba(236,253,245,0.82));
-      box-shadow: 0 14px 30px rgba(22,101,52,0.08);
-    }
-    .fortunePanel .fortuneBadge{
-      width:100%;
-      max-width:none;
-    }
-    :root[data-theme="dark"] .fortunePanel{
-      border-color: rgba(74,222,128,0.2);
-      background:
-        radial-gradient(circle at top left, rgba(34,197,94,0.18), transparent 34%),
-        linear-gradient(135deg, rgba(20,83,45,0.52), rgba(22,101,52,0.4));
-      box-shadow: 0 14px 30px rgba(0,0,0,0.22);
-    }
-    @media (max-width:900px){
-      .recoBox{
-        flex-direction:column;
-        align-items:stretch;
-        text-align:center;
-      }
-      .fortuneBadge{
-        width:100%;
-      }
-    }
-    :root[data-theme="dark"] .fortuneBadge{
-      border-color: rgba(74,222,128,0.28);
-      background:
-        radial-gradient(circle at 18% 22%, rgba(255,255,255,0.16), rgba(255,255,255,0) 30%),
-        linear-gradient(135deg, rgba(20,83,45,0.92), rgba(22,101,52,0.9) 45%, rgba(101,163,13,0.82));
-      box-shadow:
-        0 12px 26px rgba(0,0,0,0.3),
-        inset 0 0 0 1px rgba(255,255,255,0.06);
-    }
-    :root[data-theme="dark"] .fortuneTag,
-    :root[data-theme="dark"] .fortuneScore,
-    :root[data-theme="dark"] .fortuneLevel,
-    :root[data-theme="dark"] .fortuneCopy,
-    :root[data-theme="dark"] .fortuneMeta span{
-      color:#ecfccb;
-    }
-    :root[data-theme="dark"] .fortuneScore{
-      background:rgba(240,253,244,0.12);
-    }
-    .resultModal{
-      position:fixed;
-      inset:0;
-      z-index:10020;
+    .nav a{text-decoration:none;color:var(--muted)}
+
+    .hero{
       display:grid;
-      place-items:center;
-      padding:18px;
-    }
-    .resultModal.hidden{ display:none; }
-    .resultBackdrop{
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(1200px 800px at 15% 10%, rgba(20,184,166,0.24), transparent 60%),
-        radial-gradient(1000px 700px at 85% 20%, rgba(56,189,248,0.18), transparent 60%),
-        rgba(248,250,252,0.84);
-      backdrop-filter: blur(14px);
-    }
-    .resultFrame{
-      position:relative;
-      width:min(940px, 100%);
-      max-height:min(92vh, 980px);
-      overflow:auto;
-      border-radius:30px;
-      border:1px solid rgba(20,184,166,0.18);
-      background:
-        radial-gradient(circle at top left, rgba(187,247,208,0.3), transparent 28%),
-        linear-gradient(180deg, rgba(255,255,255,0.99), rgba(240,253,250,0.94));
-      box-shadow: 0 32px 80px rgba(15,23,42,0.18);
-      padding:22px;
-    }
-    .resultHead{
-      display:flex;
-      justify-content:space-between;
-      gap:16px;
-      align-items:flex-start;
+      grid-template-columns:1.25fr .95fr;
+      gap:18px;
       margin-bottom:18px;
     }
-    .resultEyebrow{
+    .panel{
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .heroMain{padding:28px}
+    .eyebrow{
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding:7px 11px;
+      padding:8px 12px;
       border-radius:999px;
-      border:1px solid rgba(20,184,166,0.22);
-      background:rgba(255,255,255,0.7);
-      color:#0f766e;
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-    }
-    .resultEyebrow::before{
-      content:"";
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:#22c55e;
-      box-shadow:0 0 12px rgba(34,197,94,0.55);
-    }
-    .resultTitle{
-      margin:12px 0 6px;
-      font-size:34px;
-      line-height:1.04;
-      font-family:"Sora","Noto Sans KR",system-ui,sans-serif;
-      letter-spacing:-0.03em;
-      color:#0f172a;
-    }
-    .resultDesc{
-      margin:0;
-      color:#475569;
-      font-size:14px;
-      line-height:1.6;
-    }
-    .resultClose{
-      border:1px solid rgba(20,184,166,0.18);
-      background:rgba(255,255,255,0.76);
-      color:#0f172a;
-      width:42px;
-      height:42px;
-      border-radius:14px;
-      cursor:pointer;
-      font-size:18px;
+      background:rgba(18,110,130,.08);
+      border:1px solid rgba(18,110,130,.14);
+      color:var(--accent);
+      font-size:12px;
       font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
     }
-    .resultClose:hover{ filter:brightness(1.03); }
-    .resultGrid{
+    h1,h2,h3{
+      font-family:"Space Grotesk","IBM Plex Sans KR",sans-serif;
+      letter-spacing:-.02em;
+      margin:0;
+    }
+    h1{
+      font-size:clamp(32px, 5vw, 54px);
+      line-height:1.02;
+      margin:16px 0 14px;
+      max-width:12ch;
+    }
+    .lead{
+      margin:0;
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.75;
+      max-width:64ch;
+    }
+    .heroList{
+      margin:18px 0 0;
+      padding:0;
+      list-style:none;
       display:grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
-      gap:16px;
+      gap:10px;
+    }
+    .heroList li{
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:var(--bg-soft);
+      color:var(--ink);
+      font-size:14px;
+    }
+    .heroSide{
+      padding:24px;
+      display:grid;
+      gap:14px;
+      align-content:start;
+      background:
+        linear-gradient(180deg, rgba(18,110,130,.06), rgba(255,255,255,.94)),
+        rgba(255,255,255,.94);
+    }
+    .statCard{
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+    }
+    .statLabel{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .statValue{margin-top:8px;font-size:28px;font-family:"Space Grotesk",sans-serif}
+    .statBody{margin-top:8px;color:var(--muted);font-size:14px;line-height:1.65}
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:18px;
       align-items:start;
     }
-    .resultMainCard,
-    .resultSideCard{
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:18px;
-      background:rgba(255,255,255,0.78);
-      box-shadow: 0 12px 26px rgba(15,23,42,0.06);
+    .section{
+      padding:24px;
+      margin-bottom:18px;
     }
-    .resultWish{
-      margin:0 0 14px;
-      padding:14px 16px;
-      border-radius:20px;
-      background:
-        radial-gradient(circle at top left, rgba(254,240,138,0.55), transparent 32%),
-        linear-gradient(135deg, rgba(255,251,235,0.96), rgba(236,253,245,0.92));
-      border:1px solid rgba(250,204,21,0.24);
-      color:#854d0e;
-      font-size:13px;
-      line-height:1.65;
-      font-weight:600;
-      font-family:"Noto Sans KR","Sora",system-ui,sans-serif;
-      letter-spacing:-0.01em;
-    }
-    .resultTickets{
-      display:grid;
-      gap:12px;
-    }
-    .resultTicket{
-      border-radius:22px;
-      padding:16px;
-      border:1px solid rgba(20,184,166,0.16);
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.98), rgba(240,253,250,0.92));
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.48);
-    }
-    .resultTicketHead{
+    .sectionHead{
       display:flex;
       justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      margin-bottom:10px;
-    }
-    .resultSet{
-      font-size:12px;
-      font-weight:800;
-      letter-spacing:0.08em;
-      color:#0f766e;
-      text-transform:uppercase;
-    }
-    .resultTag{
-      font-size:11px;
-      color:#64748b;
-      font-weight:700;
-    }
-    .resultNums{
-      justify-content:flex-start;
-      gap:10px;
-      margin-top:0;
-    }
-    .resultNums .ball{
-      width:56px;
-      height:56px;
-      font-size:19px;
-      color:#f8fafc;
-      box-shadow:
-        0 16px 34px rgba(15,23,42,0.26),
-        0 0 0 1px rgba(255,255,255,0.16) inset,
-        0 8px 16px rgba(255,255,255,0.08) inset;
-      background:
-        radial-gradient(14px 14px at 28% 24%, rgba(255,255,255,0.92), transparent 62%),
-        radial-gradient(24px 20px at 72% 78%, rgba(0,0,0,0.32), transparent 66%),
-        linear-gradient(180deg, #22c55e, #0f766e 56%, #072f2b);
-    }
-    .resultNums .ball.powerball{
-      background:
-        radial-gradient(14px 14px at 28% 24%, rgba(255,255,255,0.92), transparent 62%),
-        radial-gradient(24px 20px at 72% 78%, rgba(0,0,0,0.28), transparent 66%),
-        linear-gradient(180deg, #fb7185, #e11d48 56%, #4c0519);
-    }
-    .resultModal .fortuneBadge{
-      width:100%;
-      max-width:none;
-    }
-    .resultCaption{
-      margin:14px 0 0;
-      font-size:13px;
-      color:#64748b;
-      line-height:1.65;
-      font-weight:600;
-      font-family:"Noto Sans KR","Sora",system-ui,sans-serif;
-      letter-spacing:-0.01em;
-    }
-    @media (max-width:900px){
-      .resultGrid{ grid-template-columns:1fr; }
-      .resultTitle{ font-size:28px; }
-      .resultNums{ justify-content:center; }
-      .resultTicketHead{ flex-direction:column; align-items:flex-start; }
-    }
-    :root[data-theme="dark"] .resultBackdrop{
-      background:
-        radial-gradient(1200px 800px at 15% 10%, rgba(20,184,166,0.18), transparent 60%),
-        radial-gradient(1000px 700px at 85% 20%, rgba(56,189,248,0.16), transparent 60%),
-        rgba(2,6,23,0.76);
-    }
-    :root[data-theme="dark"] .resultFrame{
-      border-color: rgba(45,212,191,0.18);
-      background:
-        radial-gradient(circle at top left, rgba(20,184,166,0.14), transparent 28%),
-        linear-gradient(180deg, rgba(15,23,42,0.96), rgba(8,47,73,0.9));
-      box-shadow: 0 32px 80px rgba(0,0,0,0.42);
-    }
-    :root[data-theme="dark"] .resultTitle,
-    :root[data-theme="dark"] .resultClose{
-      color:#f8fafc;
-    }
-    :root[data-theme="dark"] .resultDesc,
-    :root[data-theme="dark"] .resultTag,
-    :root[data-theme="dark"] .resultCaption{
-      color:#cbd5e1;
-    }
-    :root[data-theme="dark"] .resultMainCard,
-    :root[data-theme="dark"] .resultSideCard,
-    :root[data-theme="dark"] .resultClose{
-      background:rgba(15,23,42,0.72);
-      border-color:rgba(148,163,184,0.14);
-    }
-    :root[data-theme="dark"] .resultWish{
-      background:
-        radial-gradient(circle at top left, rgba(250,204,21,0.18), transparent 32%),
-        linear-gradient(135deg, rgba(69,26,3,0.42), rgba(20,83,45,0.32));
-      border-color: rgba(250,204,21,0.18);
-      color:#fde68a;
-    }
-    :root[data-theme="dark"] .resultTicket{
-      background:linear-gradient(135deg, rgba(15,23,42,0.82), rgba(15,118,110,0.16));
-      border-color:rgba(45,212,191,0.14);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
-    }
-    .muted{color:var(--muted);font-size:13px}
-    .log{
-      height:210px; overflow:auto; white-space:pre-wrap;
-      padding:12px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,0.96);
-      color:#0f172a;
-      font-size:12px; line-height:1.55;
-    }
-    .nums{display:flex;flex-wrap:wrap;gap:7px; margin-top:8px; justify-content:center}
-    .ball{
-      position:relative;
-      width:40px; height:40px;
-      border-radius:50%;
-      display:grid; place-items:center;
-      font-family: "Sora", "Noto Sans KR", "Segoe UI", sans-serif;
-      font-weight:800;
-      letter-spacing:0.2px;
-      color:#eaf2ff;
-      background:
-        radial-gradient(12px 12px at 28% 24%, rgba(255,255,255,0.75), transparent 60%),
-        radial-gradient(18px 18px at 72% 78%, rgba(0,0,0,0.35), transparent 60%),
-        linear-gradient(180deg, #5b6a7a, #2b3440 55%, #121820);
-      border:1px solid rgba(255,255,255,0.25);
-      box-shadow:
-        0 10px 26px rgba(0,0,0,0.45),
-        0 0 0 1px rgba(255,255,255,0.12) inset,
-        0 6px 14px rgba(255,255,255,0.08) inset;
-      opacity:0;
-      transform: translateY(8px) scale(0.6);
-      animation: ballPop 0.65s cubic-bezier(.2,.9,.2,1) both;
-    }
-    .ball.powerball{
-      color:#fff2f2;
-      background:
-        radial-gradient(12px 12px at 28% 24%, rgba(255,255,255,0.8), transparent 60%),
-        radial-gradient(18px 18px at 72% 78%, rgba(0,0,0,0.35), transparent 60%),
-        linear-gradient(180deg, #ff7a7a, #c83535 55%, #5a0e0e);
-      border-color: rgba(255,255,255,0.35);
-      box-shadow:
-        0 10px 26px rgba(120,0,0,0.45),
-        0 0 0 1px rgba(255,255,255,0.18) inset,
-        0 6px 14px rgba(255,255,255,0.10) inset;
-    }
-    .ball::before{
-      content:"";
-      position:absolute;
-      width:100%; height:100%;
-      border-radius:50%;
-      background: radial-gradient(26px 18px at 32% 20%, rgba(255,255,255,0.35), transparent 70%);
-      pointer-events:none;
-    }
-    .ball::after{
-      content:"";
-      position:absolute;
-      inset:4px;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,0.12);
-      pointer-events:none;
-    }
-    @keyframes ballPop{
-      0%{ opacity:0; transform: translateY(10px) scale(0.5); }
-      70%{ opacity:1; transform: translateY(-2px) scale(1.06); }
-      100%{ opacity:1; transform: translateY(0) scale(1); }
-    }
-    @media (max-width:900px){
-      .ball{ width:34px; height:34px; }
-    }
-    .kpiRow{
-      display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;
-    }
-    .kpi{
-      padding:8px 10px;
-      border-radius:14px;
-      border:1px solid rgba(20,184,166,0.25);
-      background: rgba(20,184,166,0.08);
-      font-size:12px;
-      display:flex; align-items:center; gap:8px;
-    }
-    .kpi b{color:var(--fg)}
-    .kpi .miniDot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px rgba(34,197,94,0.45)}
-    .kpiEmphasis{
-      min-width:220px;
-      padding:14px 16px;
-      border-radius:18px;
-      border:1px solid rgba(20,184,166,0.26);
-      background:
-        radial-gradient(circle at top left, rgba(187,247,208,0.34), transparent 34%),
-        linear-gradient(135deg, rgba(255,255,255,0.98), rgba(236,253,245,0.92));
-      box-shadow: 0 14px 26px rgba(15,23,42,0.08);
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .kpiLabel{
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-      color:#0f766e;
-    }
-    .kpiValue{
-      font-size:22px;
-      font-weight:900;
-      color:var(--fg);
-      line-height:1.1;
-    }
-    .kpiSub{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-    .kpiSub span{
-      display:inline-flex;
-      align-items:center;
-      padding:5px 9px;
-      border-radius:999px;
-      background:rgba(20,184,166,0.10);
-      border:1px solid rgba(20,184,166,0.16);
-      color:var(--muted);
-      font-size:11px;
-      font-weight:700;
-    }
-    :root[data-theme="dark"] .kpiEmphasis{
-      border-color: rgba(45,212,191,0.24);
-      background:
-        radial-gradient(circle at top left, rgba(20,184,166,0.16), transparent 34%),
-        linear-gradient(135deg, rgba(15,23,42,0.92), rgba(15,118,110,0.18));
-      box-shadow: 0 14px 26px rgba(0,0,0,0.24);
-    }
-    :root[data-theme="dark"] .kpiLabel{
-      color:#5eead4;
-    }
-    :root[data-theme="dark"] .kpiSub span{
-      background:rgba(45,212,191,0.10);
-      border-color: rgba(45,212,191,0.18);
-      color:#d1fae5;
-    }
-
-    /* ===== HUD Overlay (robot compute) ===== */
-    .hud.hidden{ display:none; }
-    .isHidden{ display:none !important; }
-    .hud{
-      position:fixed; inset:0; z-index:9999;
-      display:grid; place-items:center;
-    }
-    .hudBg{
-      position:absolute; inset:0;
-      background:
-        radial-gradient(1000px 700px at 20% 15%, rgba(20,184,166,0.16), transparent 60%),
-        radial-gradient(1000px 700px at 85% 25%, rgba(56,189,248,0.14), transparent 60%),
-        rgba(248,250,252,0.92);
-      backdrop-filter: blur(12px);
-    }
-    .hudFrame{
-      position:relative;
-      width:min(980px, 92vw);
-      border-radius:24px;
-      border:1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.92));
-      box-shadow: 0 30px 80px rgba(15,23,42,0.18);
-      overflow:hidden;
-    }
-    .hudFrame.analyzing{
-      box-shadow:
-        0 30px 80px rgba(15,23,42,0.22),
-        0 0 0 1px rgba(20,184,166,0.18) inset,
-        0 0 50px rgba(20,184,166,0.16);
-    }
-    .hudFrame::before{
-      content:"";
-      position:absolute; inset:-3px;
-      background: linear-gradient(120deg, rgba(70,243,255,0.35), rgba(139,92,255,0.24), rgba(255,91,214,0.18));
-      filter: blur(18px);
-      opacity:.55;
-      pointer-events:none;
-    }
-    .hudFrame::after{
-      content:"";
-      position:absolute; inset:0;
-      background: repeating-linear-gradient(0deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 5px);
-      opacity:.10;
-      pointer-events:none;
-    }
-    .hudTop{
-      position:relative; z-index:1;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 16px;
-      border-bottom:1px solid var(--line);
-    }
-    .hudTitle{display:flex; gap:10px; align-items:center}
-    .hudTitle .dot{width:10px;height:10px;border-radius:50%;background:var(--neon);box-shadow:0 0 14px rgba(20,184,166,0.55)}
-    .hudClose{
-      border:1px solid rgba(255,255,255,0.16);
-      background: rgba(255,255,255,0.06);
-      border-radius:14px;
-      padding:8px 10px;
-      cursor:pointer;
-      color:var(--fg);
-    }
-    .hudBody{
-      position:relative; z-index:1;
-      display:grid;
-      grid-template-columns: 340px 1fr;
-      gap:14px;
-      padding:16px;
-    }
-    @media (max-width:900px){
-      .hudBody{ grid-template-columns:1fr; }
-    }
-    .hudLeft{display:flex; flex-direction:column; gap:14px}
-    .hudRight{display:flex; flex-direction:column; gap:12px}
-    .hudConsole{
-      height:280px;
-      overflow:auto;
-      padding:12px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,0.96);
-      color:#0f172a;
-      white-space:pre-wrap;
-      line-height:1.55;
-    }
-    .hudMini{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:10px;
-    }
-    .powerballLoader{
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.04);
-      padding:14px;
-      display:none;
-      align-items:center;
       gap:12px;
+      align-items:flex-end;
+      margin-bottom:18px;
     }
-    .powerballLoader.isActive{ display:flex; }
-    .powerballBall{
-      width:56px;height:56px;border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, #fff 0%, #ffdede 22%, #ff4a4a 55%, #a40000 100%);
-      box-shadow: 0 0 24px rgba(255,80,80,0.6), inset 0 0 12px rgba(255,255,255,0.4);
-      display:grid; place-items:center;
-      font-weight:900;
-      color:#220000;
-      animation: powerballSpin 1.1s linear infinite;
-      position:relative;
-      overflow:hidden;
+    .sectionHead p{
+      margin:8px 0 0;
+      color:var(--muted);
+      line-height:1.7;
+      max-width:65ch;
     }
-    .powerballBall::after{
-      content:"";
-      position:absolute; inset:8px;
-      border-radius:50%;
-      border:1px dashed rgba(255,255,255,0.65);
-      animation: powerballOrbit 1.6s linear infinite;
+    .controlGrid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:12px;
+      margin-bottom:14px;
     }
-    .powerballTrail{
+    .field{
       display:flex;
       flex-direction:column;
       gap:6px;
     }
-    .powerballTrail span{
-      width:8px;height:8px;border-radius:50%;
-      background:rgba(255,120,120,0.9);
-      box-shadow:0 0 10px rgba(255,80,80,0.8);
-      animation: powerballPulse 0.9s ease-in-out infinite;
-    }
-    .powerballTrail span:nth-child(2){ animation-delay:.15s; opacity:.8; }
-    .powerballTrail span:nth-child(3){ animation-delay:.3s; opacity:.6; }
-    .powerballLabel{
-      font-size:12px;
+    .field label{
+      font-size:13px;
       color:var(--muted);
     }
-    @keyframes powerballSpin{
-      0%{ transform:rotate(0deg); }
-      100%{ transform:rotate(360deg); }
+    select,input,button,textarea{
+      font:inherit;
     }
-    @keyframes powerballOrbit{
-      0%{ transform:rotate(0deg); }
-      100%{ transform:rotate(-360deg); }
-    }
-    @keyframes powerballPulse{
-      0%,100%{ transform:translateX(0); opacity:.6; }
-      50%{ transform:translateX(6px); opacity:1; }
-    }
-    .miniCard{
-      border-radius:18px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,0.92);
-      padding:10px;
-    }
-    .miniTitle{color:var(--muted);font-size:12px}
-    .miniValue{margin-top:6px;font-weight:900;text-shadow:0 0 18px rgba(70,243,255,0.25)}
-    .hudMeter{
-      border-radius:20px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,0.92);
-      padding:12px;
-    }
-    .meterLabel{display:flex; justify-content:space-between; font-size:12px; color:var(--muted)}
-    .meterTrack{
-      margin-top:10px;
-      height:12px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background: rgba(15,23,42,0.06);
-      overflow:hidden;
-    }
-    .meterBar{
-      height:100%;
-      width:0%;
-      border-radius:999px;
-      background: linear-gradient(90deg, rgba(70,243,255,0.95), rgba(139,92,255,0.95), rgba(255,91,214,0.75));
-      box-shadow: 0 0 26px rgba(70,243,255,0.35);
-      transition: width .12s linear;
-    }
-    .meterSub{margin-top:10px; font-size:12px; color:var(--muted)}
-    .hudBottom{
-      position:relative; z-index:1;
-      padding:12px 16px;
-      border-top:1px solid rgba(255,255,255,0.10);
-      display:flex; justify-content:space-between; gap:10px;
-      color:var(--muted);
-    }
-    .glow{text-shadow:0 0 20px rgba(70,243,255,0.35)}
-
-    /* CSS Robot */
-    .robot{
-      position:relative;
-      width:260px; height:260px;
-      margin:0 auto;
-      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.55));
-    }
-    .antenna{
-      position:absolute; left:50%; top:8px; transform:translateX(-50%);
-      width:6px; height:46px; border-radius:99px;
-      background: linear-gradient(180deg, rgba(70,243,255,0.9), rgba(70,243,255,0.05));
-    }
-    .antenna::after{
-      content:""; position:absolute; left:50%; top:-10px; transform:translateX(-50%);
-      width:16px;height:16px;border-radius:50%;
-      background:var(--neon);
-      box-shadow:0 0 24px rgba(70,243,255,0.95);
-      animation: pulseA 1.1s infinite;
-    }
-    @keyframes pulseA{0%,100%{transform:translateX(-50%) scale(1);opacity:1}50%{transform:translateX(-50%) scale(1.12);opacity:.8}}
-
-    .head{
-      position:absolute; left:50%; top:46px; transform:translateX(-50%);
-      width:220px; height:122px; border-radius:22px;
-      border:1px solid rgba(255,255,255,0.16);
-      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
-      overflow:hidden;
-    }
-    .visor{
-      position:absolute; left:14px; right:14px; top:16px; height:56px;
-      border-radius:18px;
-      background: linear-gradient(90deg, rgba(70,243,255,0.18), rgba(139,92,255,0.12));
-      border:1px solid rgba(70,243,255,0.28);
-      overflow:hidden;
-    }
-    .scanline{
-      position:absolute; left:0; right:0;
-      height:22px;
-      background: linear-gradient(180deg, transparent, rgba(20,184,166,0.38), transparent);
-      animation: scan 1.15s linear infinite;
-    }
-    .hudFrame.analyzing .scanline{ animation-duration:0.75s; }
-    @keyframes scan{0%{top:-28px}100%{top:88px}}
-    .eyes{
-      position:absolute; left:0; right:0; bottom:14px;
-      display:flex; justify-content:center; gap:10px;
-    }
-    .eyes span{
-      width:10px;height:10px;border-radius:50%;
-      background: rgba(20,184,166,0.95);
-      box-shadow: 0 0 14px rgba(20,184,166,0.6);
-      animation: blink 2.2s infinite;
-    }
-    .hudFrame.analyzing .eyes span{ animation-duration:1.1s; }
-    .eyes span:nth-child(2){ animation-delay:.2s; background: rgba(56,189,248,0.92); }
-    .eyes span:nth-child(3){ animation-delay:.4s; background: rgba(34,197,94,0.82); }
-    @keyframes blink{0%,92%,100%{transform:scale(1)}94%{transform:scale(0.25)}96%{transform:scale(1)}}
-
-    .neck{
-      position:absolute; left:50%; top:170px; transform:translateX(-50%);
-      width:46px; height:18px; border-radius:10px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-    }
-    .torso{
-      position:absolute; left:50%; top:188px; transform:translateX(-50%);
-      width:240px; height:88px; border-radius:24px;
-      border:1px solid rgba(255,255,255,0.16);
-      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
-    }
-    .core{
-      position:absolute; left:50%; top:20px; transform:translateX(-50%);
-      width:46px; height:46px; border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, rgba(20,184,166,1), rgba(56,189,248,0.65), rgba(34,197,94,0.25), rgba(0,0,0,0));
-      box-shadow: 0 0 26px rgba(20,184,166,0.35);
-      animation: corePulse 1.1s infinite;
-    }
-    @keyframes corePulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.08)}}
-    .bars{
-      position:absolute; right:16px; top:18px;
-      display:flex; gap:6px; align-items:flex-end;
-    }
-    .bars i{
-      display:block;
-      width:6px; height:18px;
-      border-radius:999px;
-      background: rgba(20,184,166,0.62);
-      animation: eq .8s infinite;
-    }
-    .bars i:nth-child(2){height:26px; animation-delay:.1s; background: rgba(56,189,248,0.62)}
-    .bars i:nth-child(3){height:14px; animation-delay:.2s}
-    .bars i:nth-child(4){height:30px; animation-delay:.3s; background: rgba(34,197,94,0.52)}
-    .bars i:nth-child(5){height:20px; animation-delay:.4s}
-    @keyframes eq{0%,100%{transform:scaleY(.7);opacity:.7}50%{transform:scaleY(1.25);opacity:1}}
-
-    .arms .arm{
-      position:absolute; top:204px;
-      width:54px; height:64px; border-radius:18px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.04);
-      display:flex; flex-direction:column; justify-content:center; gap:8px;
-      padding:10px;
-    }
-    .arms .left{ left:-8px; transform:rotate(-8deg); }
-    .arms .right{ right:-8px; transform:rotate(8deg); }
-    .arms b{
-      display:block; height:8px; border-radius:999px;
-      background: linear-gradient(90deg, rgba(20,184,166,0.55), rgba(56,189,248,0.45), rgba(34,197,94,0.40));
-      animation: shimmer 1.1s infinite;
-    }
-    @keyframes shimmer{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
-
-    /* subtle shake on compute */
-    .shake{
-      animation: shake .45s ease-in-out;
-    }
-    @keyframes shake{
-      0%,100%{transform:translate(0,0)}
-      20%{transform:translate(-2px,1px)}
-      40%{transform:translate(3px,-2px)}
-      60%{transform:translate(-3px,2px)}
-      80%{transform:translate(2px,-1px)}
-    }
-
-    /* Dark mode refinements */
-    :root[data-theme="dark"] .card{
-      background: rgba(18,22,32,0.85);
-      border-color: rgba(255,255,255,0.12);
-      box-shadow: 0 16px 50px rgba(0,0,0,0.45);
-    }
-    :root[data-theme="dark"] .log,
-    :root[data-theme="dark"] .hudConsole{
-      background: rgba(6,9,16,0.75);
-      color:#dbe7ff;
-      border-color: rgba(255,255,255,0.12);
-    }
-    :root[data-theme="dark"] .chip{
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.12);
-      box-shadow: none;
-    }
-    :root[data-theme="dark"] .panel{
-      background: linear-gradient(180deg, rgba(18,22,32,0.92), rgba(18,22,32,0.72));
-    }
-    :root[data-theme="dark"] .panel::before{
-      opacity:.35;
-    }
-    :root[data-theme="dark"] .hudBg{
-      background:
-        radial-gradient(1000px 700px at 20% 15%, rgba(20,184,166,0.12), transparent 60%),
-        radial-gradient(1000px 700px at 85% 25%, rgba(56,189,248,0.12), transparent 60%),
-        rgba(4,6,12,0.88);
-    }
-    :root[data-theme="dark"] .hudFrame{
-      background: linear-gradient(180deg, rgba(18,22,32,0.96), rgba(18,22,32,0.8));
-      border-color: rgba(255,255,255,0.12);
-      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-    }
-    :root[data-theme="dark"] .hudMeter,
-    :root[data-theme="dark"] .miniCard{
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.12);
-    }
-    :root[data-theme="dark"] .meterTrack{
-      background: rgba(0,0,0,0.35);
-      border-color: rgba(255,255,255,0.12);
-    }
-    :root[data-theme="dark"] .megaBtn,
-    :root[data-theme="dark"] .formBtn{
-      color:#ffffff;
-    }
-    :root[data-theme="dark"] .megaBtn .sub{
-      color:rgba(255,255,255,0.78);
-    }
-    :root[data-theme="dark"] .kpi b{
-      color:#e6edf7;
-    }
-    :root[data-theme="dark"] .commentItem{
-      background: rgba(255,255,255,0.04);
-      border-color: rgba(255,255,255,0.12);
-    }
-    :root[data-theme="dark"] .commentDelete{
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.18);
-      color:#e6edf7;
-    }
-    :root[data-theme="dark"] .formBtn{
-      border-color: rgba(20,184,166,0.45);
-      color:#ffffff;
-    }
-    :root[data-theme="dark"] .footer{
-      background: rgba(18,22,32,0.85);
-      border-color: rgba(255,255,255,0.12);
-      color:#9aa7bf;
-    }
-    :root[data-theme="dark"] .contentHub{
-      background: linear-gradient(180deg, rgba(18,22,32,0.92), rgba(18,22,32,0.78));
-      border-color: rgba(255,255,255,0.12);
-    }
-    :root[data-theme="dark"] .sectionCard{
-      background: rgba(18,22,32,0.9);
-      border-color: rgba(255,255,255,0.12);
-    }
-    :root[data-theme="dark"] .tag,
-    :root[data-theme="dark"] .metric,
-    :root[data-theme="dark"] .faqItem,
-    :root[data-theme="dark"] .policyItem{
-      background: rgba(255,255,255,0.04);
-      border-color: rgba(255,255,255,0.12);
-    }
-
-    .disclaimer{
-      margin-top:16px;
-      padding:10px 12px;
+    select,input,textarea{
+      width:100%;
+      padding:12px 13px;
       border-radius:14px;
-      border:1px dashed rgba(15,23,42,0.18);
-      background: rgba(15,23,42,0.04);
-      color:var(--muted);
-      font-size:11px;
-      line-height:1.5;
-      text-align:center;
-      opacity:0.9;
-    }
-    :root[data-theme="dark"] .disclaimer{
-      border-color: rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.04);
-      color: var(--muted);
-    }
-
-    .siteHeader{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:16px;
-    }
-    .headerActions{
-      display:flex;
-      align-items:center;
-    }
-    .logo{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:700;
-      font-size:18px;
-    }
-    .logoBadge{
-      width:34px;height:34px;border-radius:12px;
-      background:linear-gradient(135deg, rgba(20,184,166,0.95), rgba(56,189,248,0.9));
-      display:grid;place-items:center;
-      color:#0b1020;
-      font-weight:800;
-      box-shadow: 0 12px 30px rgba(20,184,166,0.25);
-    }
-    .navLinks{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-    }
-    .navLinks a,
-    .hubToggle{
-      text-decoration:none;
-      font-size:11px;
-      font-family:"Noto Sans KR","Sora",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      font-weight:700;
-      letter-spacing:0.01em;
-      color:#4b5563;
-      border:1px solid rgba(20,184,166,0.18);
-      padding:6px 11px;
-      border-radius:999px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.94), rgba(240,253,250,0.82));
-      box-shadow: 0 6px 14px rgba(15,23,42,0.04);
-      transition:transform .2s ease, color .2s ease, border .2s ease, background .2s ease, box-shadow .2s ease;
-      cursor:pointer;
-    }
-    .navLinks a:hover,
-    .hubToggle:hover{
-      transform:translateY(-1px);
-      color:#0f172a;
-      border-color:rgba(20,184,166,0.34);
-      background:linear-gradient(180deg, rgba(236,253,245,0.98), rgba(220,252,231,0.9));
-      box-shadow: 0 10px 18px rgba(20,184,166,0.10);
-    }
-    .hubToggle{
-      font-size:10px;
-      font-weight:800;
-      letter-spacing:0.08em;
-      text-transform:uppercase;
-      color:#0f766e;
-      border-color:rgba(20,184,166,0.28);
-      background:linear-gradient(180deg, rgba(236,253,245,0.96), rgba(204,251,241,0.82));
-      padding:5px 10px;
-    }
-    :root[data-theme="dark"] .navLinks a,
-    :root[data-theme="dark"] .hubToggle{
-      color:#cbd5e1;
-      border-color:rgba(45,212,191,0.18);
-      background:linear-gradient(180deg, rgba(15,23,42,0.78), rgba(15,118,110,0.14));
-      box-shadow:none;
-    }
-    :root[data-theme="dark"] .navLinks a:hover,
-    :root[data-theme="dark"] .hubToggle:hover{
-      color:#f8fafc;
-      border-color:rgba(94,234,212,0.38);
-      background:linear-gradient(180deg, rgba(15,23,42,0.92), rgba(20,184,166,0.18));
-    }
-    :root[data-theme="dark"] .hubToggle{
-      color:#5eead4;
-    }
-
-    .contentHub{
-      margin-top:26px;
-      padding:18px;
-      border-radius:22px;
       border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98));
-      box-shadow: 0 12px 30px rgba(15,23,42,0.08);
-      position:relative;
-      overflow:hidden;
+      background:#fff;
+      color:var(--ink);
+      outline:none;
     }
-    .contentHub::before{
-      content:"";
-      position:absolute; inset:-2px;
-      background: linear-gradient(120deg, rgba(20,184,166,0.16), rgba(59,130,246,0.10), rgba(251,191,36,0.12));
-      filter: blur(34px);
-      opacity:.35;
-      pointer-events:none;
-    }
-    .contentBody{
-      position:relative;
-      z-index:1;
-      max-height:2000px;
-      opacity:1;
-      transform:translateY(0);
-      transition:max-height .4s ease, opacity .25s ease, transform .25s ease;
-    }
-    .contentBody.isCollapsed{
-      max-height:0;
-      opacity:0;
-      transform:translateY(-6px);
-      overflow:hidden;
-      pointer-events:none;
-    }
-    .sectionHead{
-      position:relative;
-      z-index:1;
+    textarea{min-height:120px;resize:vertical}
+    .actions{
       display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
+      gap:10px;
       flex-wrap:wrap;
-      gap:12px;
+      align-items:center;
       margin-bottom:14px;
     }
-    .sectionHead h2{
-      margin:0;
-      font-size:20px;
+    .btn{
+      border:0;
+      border-radius:14px;
+      padding:13px 16px;
+      cursor:pointer;
+      font-weight:700;
     }
-    .sectionHead p{
-      margin:0;
-      color:var(--muted);
-      font-size:13px;
-      max-width:640px;
+    .btnPrimary{
+      color:#fff;
+      background:linear-gradient(135deg, var(--accent), var(--accent-3));
+      box-shadow:0 18px 36px rgba(18,110,130,.20);
     }
-    .sectionGrid{
-      position:relative;
-      z-index:1;
-      display:grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      gap:16px;
-      margin-top:8px;
-    }
-    .sectionCard{
-      grid-column: span 6;
-      background: rgba(255,255,255,0.96);
+    .btnGhost{
+      background:var(--bg-soft);
+      color:var(--ink);
       border:1px solid var(--line);
-      border-radius:18px;
-      padding:14px 16px;
-      min-height:160px;
-      box-shadow: 0 10px 26px rgba(15,23,42,0.08);
     }
-    .sectionCard.full{ grid-column: span 12; }
-    .sectionCard h3{
-      margin:0 0 8px;
-      font-size:16px;
-    }
-    .sectionCard p{
-      margin:0 0 10px;
+    .helper{
       color:var(--muted);
       font-size:13px;
-      line-height:1.7;
+      line-height:1.6;
     }
-    .tagRow{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-    .tag{
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.14);
-      background:rgba(15,23,42,0.04);
-      font-size:12px;
-      color:var(--muted);
-    }
-    .metricGrid{
+    .results{
       display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap:10px;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:12px;
+      margin-top:14px;
     }
     .metric{
+      padding:16px;
       border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px;
-      background:rgba(15,23,42,0.04);
+      border-radius:18px;
+      background:#fff;
     }
-    .metric b{ display:block; font-size:13px; }
-    .metric span{ font-size:12px; color:var(--muted); }
-    .kv{
-      display:grid;
-      grid-template-columns: 120px 1fr;
-      gap:8px;
-      font-size:12px;
+    .metric b{
+      display:block;
+      font-size:13px;
       color:var(--muted);
+      margin-bottom:8px;
     }
-    .kv div{ padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.08); }
-    .kv div:last-child{ border-bottom:0; }
-    .faqList, .policyList{
+    .metric span{
+      font-size:24px;
+      font-family:"Space Grotesk",sans-serif;
+    }
+    .viz{
+      margin-top:14px;
+      padding:16px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+    }
+    .bars{
       display:grid;
       gap:10px;
+      margin-top:8px;
     }
-    .faqItem, .policyItem{
+    .barRow{
+      display:grid;
+      grid-template-columns:64px 1fr 54px;
+      gap:10px;
+      align-items:center;
+      font-size:13px;
+    }
+    .barTrack{
+      height:12px;
+      border-radius:999px;
+      background:var(--bg-soft);
+      overflow:hidden;
+    }
+    .barFill{
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+    .log{
+      margin-top:14px;
+      padding:16px;
+      border-radius:18px;
+      background:#0f1c2e;
+      color:#d9e4f2;
+      font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size:13px;
+      line-height:1.65;
+      min-height:160px;
+      white-space:pre-wrap;
+    }
+    .cardList{
+      display:grid;
+      gap:12px;
+    }
+    .infoCard{
+      padding:18px;
       border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 12px;
-      background:rgba(15,23,42,0.04);
+      border-radius:18px;
+      background:#fff;
     }
-    .faqItem b, .policyItem b{ display:block; margin-bottom:6px; }
-    .note{
-      font-size:12px;
+    .infoCard p,.infoCard li,.policy p{
+      margin:8px 0 0;
       color:var(--muted);
+      line-height:1.7;
+    }
+    .miniList{
+      margin:10px 0 0;
+      padding-left:18px;
+      color:var(--muted);
+    }
+    .policyGrid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:12px;
+    }
+    .policy{
+      padding:18px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+    .contactBox{
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+      margin-top:14px;
     }
     .footer{
-      margin-top:18px;
-      padding:16px;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,0.96);
+      margin-top:8px;
+      padding:20px 4px 0;
+      color:var(--muted);
+      font-size:14px;
       display:flex;
-      flex-wrap:wrap;
-      gap:10px;
       justify-content:space-between;
-      font-size:12px;
-      color:var(--muted);
-    }
-    .footer a{ text-decoration:none; }
-    .toc{
-      display:flex;
+      gap:12px;
       flex-wrap:wrap;
-      gap:8px;
-    }
-    .toc a{
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
-      color:var(--muted);
-      text-decoration:none;
-    }
-    .toc a:hover{ color:var(--fg); border-color:rgba(70,243,255,0.4); }
-    @media (max-width:900px){
-      .sectionCard{ grid-column: span 12; }
-      .metricGrid{ grid-template-columns:1fr; }
-      .kv{ grid-template-columns:1fr; }
     }
 
-    a{color:inherit}
+    @media (max-width:980px){
+      .hero,.grid,.policyGrid{grid-template-columns:1fr}
+      .results{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:680px){
+      .controlGrid,.results{grid-template-columns:1fr}
+      .topbar{align-items:flex-start;flex-direction:column}
+      h1{max-width:none}
+      .footer{flex-direction:column}
+    }
   </style>
 </head>
-
 <body>
-<canvas id="bgFx"></canvas>
-
-<div class="wrap">
-  <header class="siteHeader" aria-label="사이트 헤더">
-    <div class="logo">
-      <span class="logoBadge">LM</span>
-      <span>LottoMind-AI</span>
-    </div>
-    <div class="headerActions">
-      <button id="hubToggle" class="hubToggle" type="button" aria-expanded="false">콘텐츠 허브 보기</button>
-    </div>
-    <nav class="navLinks" aria-label="빠른 이동">
-      <a href="#analysis">분석 허브</a>
-      <a href="#how">서비스 소개</a>
-      <a href="#data">데이터 출처</a>
-      <a href="#method">방법론</a>
-      <a href="#guide">이용 가이드</a>
-      <a href="#faq">FAQ</a>
-      <a href="#responsible">책임 있는 이용</a>
-      <a href="#policy">정책 요약</a>
-      <a href="#privacy">개인정보</a>
-      <a href="#terms">이용약관</a>
-      <a href="#contact">문의</a>
-    </nav>
-  </header>
-
-  <div class="top">
-    <div class="panel">
-      <div class="panelHead">
-        <div class="brandRow">
-          <span class="badge"><span class="dot"></span><span class="mono">LOTTOCORE v1.0</span></span>
-          <span class="badge"><span class="mono">SNAPSHOT ANALYSIS</span></span>
-          <button id="themeToggle" class="pill themeBtn" type="button" aria-pressed="false">테마 전환</button>
-        </div>
-        <h1>🤖 LottoMind-AI · 통계 기반 로또/파워볼 분석 허브</h1>
-        <p id="descMain" class="desc">
-          버튼을 누르면 <b>가중치 기반 샘플링</b>과 <b>Hot/Cold/Overdue</b> + <b>연속/구간 패턴</b> 통계를 요약해
-          참고용 번호 조합을 제공합니다.
-          <br><span class="mono muted">※ 공개 데이터 또는 샘플 데이터 기반 통계 요약</span>
-        </p>
-        <div id="modeNote" class="muted" style="margin-top:-4px;">
-          현재 모드: K-Lotto (6/45) · 스냅샷 기반 분석 제공
-        </div>
-        <div class="kpiRow" id="kpiRow"></div>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brandMark">OP</div>
+        <div>Open Pattern Lab</div>
       </div>
-
-      <div class="controls">
-        <div class="pill">
-          <span class="muted">로또 종류</span>
-          <select id="lotteryType">
-            <option value="kr" selected>K-Lotto (6/45)</option>
-            <option value="powerball">US Powerball (5+1)</option>
-          </select>
-        </div>
-        <div class="pill">
-          <span class="muted">생성 줄 수</span>
-          <select id="lineCount">
-            <option value="1">1줄</option>
-            <option value="2">2줄</option>
-            <option value="3">3줄</option>
-            <option value="4">4줄</option>
-            <option value="5" selected>5줄</option>
-            <option value="6">6줄</option>
-            <option value="7">7줄</option>
-            <option value="8">8줄</option>
-            <option value="9">9줄</option>
-            <option value="10">10줄</option>
-          </select>
-        </div>
-        <div class="fortuneControls">
-          <div class="pill fortunePill">
-            <span>생년월일</span>
-            <input id="birthDate" type="date" max="2099-12-31">
-          </div>
-          <div class="pill fortunePill">
-            <span>성별</span>
-            <select id="birthGender">
-              <option value="female">여성</option>
-              <option value="male">남성</option>
-            </select>
-          </div>
-          <div class="pill fortunePill">
-            <span>달력 기준</span>
-            <select id="birthCalendar">
-              <option value="solar">양력</option>
-              <option value="lunar">음력</option>
-            </select>
-          </div>
-          <div class="pill fortunePill">
-            <span>태어난 시</span>
-            <select id="birthHour">
-              <option value="ja">자시 (23:00-00:59)</option>
-              <option value="chuk">축시 (01:00-02:59)</option>
-              <option value="in">인시 (03:00-04:59)</option>
-              <option value="myo">묘시 (05:00-06:59)</option>
-              <option value="jin">진시 (07:00-08:59)</option>
-              <option value="sa">사시 (09:00-10:59)</option>
-              <option value="o" selected>오시 (11:00-12:59)</option>
-              <option value="mi">미시 (13:00-14:59)</option>
-              <option value="sin">신시 (15:00-16:59)</option>
-              <option value="yu">유시 (17:00-18:59)</option>
-              <option value="sul">술시 (19:00-20:59)</option>
-              <option value="hae">해시 (21:00-22:59)</option>
-            </select>
-          </div>
-          <div class="fortuneHint">입력한 생년월일과 태어난 시를 오늘 날짜와 조합해 금전운만 표시합니다.</div>
-        </div>
-
-        <button id="btnGenerate" class="megaBtn" type="button">
-          RUN AI ANALYSIS
-          <span class="sub">로봇 HUD 계산 후 추천 번호 출력</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="panel" style="max-width:420px;min-width:320px;">
-      <div class="panelHead">
-        <div class="brandRow">
-          <span class="badge"><span class="dot"></span><span class="mono">ROBOT LOG</span></span>
-        </div>
-        <h1 style="margin-top:10px;">🧠 실시간 계산 로그</h1>
-        <p class="desc">수집/분석/샘플링 단계가 로봇 콘솔로 출력됩니다.</p>
-      </div>
-      <div class="controls" style="padding-top:0;">
-        <div id="log" class="log mono"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="analysis"></div>
-  <div class="grid" id="analysisGrid">
-    <div class="card c6 analysisCard">
-      <h2>🔥 HOT (많이 나온 TOP 10)</h2>
-      <div id="hot" class="chips"></div>
-    </div>
-
-    <div class="card c6 analysisCard">
-      <h2>🧊 COLD (적게 나온 TOP 10)</h2>
-      <div id="cold" class="chips"></div>
-    </div>
-
-    <div class="card c6 analysisCard">
-      <h2>⏳ OVERDUE (오래 안 나온 TOP 10)</h2>
-      <div id="overdue" class="chips"></div>
-    </div>
-
-    <div class="card c6 analysisCard">
-      <h2>📊 패턴 분석 (연속번호 / 구간)</h2>
-      <div id="pattern" class="chips"></div>
-    </div>
-
-    <div class="card c6 powerballCard isHidden">
-      <h2>🇺🇸 WHITE HOT (상위 10)</h2>
-      <div id="pbWhiteHot" class="chips"></div>
-    </div>
-
-    <div class="card c6 powerballCard isHidden">
-      <h2>🇺🇸 WHITE COLD (하위 10)</h2>
-      <div id="pbWhiteCold" class="chips"></div>
-    </div>
-
-    <div class="card c6 powerballCard isHidden">
-      <h2>🇺🇸 WHITE OVERDUE (상위 10)</h2>
-      <div id="pbWhiteOverdue" class="chips"></div>
-    </div>
-
-    <div class="card c6 powerballCard isHidden">
-      <h2>🔴 POWERBALL STATS</h2>
-      <div id="pbRedStats" class="chips"></div>
-    </div>
-
-    <div class="card c6">
-      <h2>⚙️ 가중치 기반 추천 조합</h2>
-      <div id="reco" class="muted">먼저 <b>INITIATE LOTTO CORE</b>로 데이터를 불러오세요.</div>
-    </div>
-
-    <div class="card c12" id="contact">
-      <h2>✉️ 문의 / 피드백 · 💬 댓글 남기기</h2>
-      <div class="formGrid formSplit">
-        <div>
-          <div class="muted" style="margin-bottom:8px;">문의 / 피드백</div>
-          <form action="https://formspree.io/f/maqddppl" method="POST">
-            <div class="formField">
-              <label for="formName">이름</label>
-              <input id="formName" name="name" type="text" placeholder="이름을 입력하세요" required>
-            </div>
-            <div class="formField">
-              <label for="formEmail">이메일</label>
-              <input id="formEmail" name="email" type="email" placeholder="답변 받을 이메일" required>
-            </div>
-            <div class="formField">
-              <label for="formMessage">메시지</label>
-              <textarea id="formMessage" name="message" placeholder="문의 내용을 적어주세요" required></textarea>
-            </div>
-            <button class="formBtn" type="submit">전송하기</button>
-          </form>
-        </div>
-        <div>
-          <div class="muted" style="margin-bottom:8px;">댓글 남기기</div>
-          <form id="commentForm" action="https://formspree.io/f/maqddppl" method="POST">
-            <div class="formField">
-              <label for="commentName">닉네임</label>
-              <input id="commentName" name="comment_name" type="text" placeholder="닉네임을 입력하세요" required>
-            </div>
-            <div class="formField">
-              <label for="commentBody">댓글</label>
-              <textarea id="commentBody" name="comment_body" placeholder="댓글을 입력하세요" required></textarea>
-            </div>
-            <button class="formBtn" type="submit">댓글 전송</button>
-          </form>
-          <div class="muted" style="margin-top:8px;">작성한 댓글은 이 브라우저에만 저장됩니다.</div>
-          <div class="commentActions">
-            <button id="commentClearAll" class="commentDelete" type="button">댓글 전체 삭제</button>
-          </div>
-          <div id="commentList" class="commentList"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <section class="contentHub" aria-label="콘텐츠 허브">
-    <div class="sectionHead">
-      <h2>콘텐츠 허브</h2>
-      <p>검증 가능한 데이터 출처, 방법론, 책임 있는 이용 가이드와 FAQ를 한 곳에 정리했습니다. 본문 콘텐츠를 충분히 제공하여 광고가 노출되는 모든 화면에서 사용자에게 실질적인 정보를 전달합니다.</p>
-    </div>
-    <div id="hubBody" class="contentBody isCollapsed">
-      <div class="toc" aria-label="콘텐츠 목차">
-        <a href="#how">서비스 소개</a>
-        <a href="#data">데이터 출처</a>
+      <nav class="nav" aria-label="빠른 이동">
+        <a href="#lab">실험실</a>
+        <a href="#guide">학습 가이드</a>
         <a href="#method">방법론</a>
-        <a href="#guide">이용 가이드</a>
-        <a href="#faq">FAQ</a>
-        <a href="#responsible">책임 있는 이용</a>
-        <a href="#policy">정책 요약</a>
+        <a href="#policy">운영 정책</a>
         <a href="#privacy">개인정보</a>
-        <a href="#terms">이용약관</a>
-        <a href="#changelog">변경 로그</a>
+        <a href="#contact">문의</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="panel heroMain">
+        <div class="eyebrow">Probability Playground</div>
+        <h1>확률과 패턴을 직접 실험하는 교육형 데이터 페이지</h1>
+        <p class="lead">
+          Open Pattern Lab은 동전 던지기, 주사위 분포, 랜덤 워크 같은 기초 확률 실험을 브라우저에서 바로 실행하고,
+          표본 크기에 따라 결과가 어떻게 달라지는지 설명하는 학습용 페이지입니다. 특정 상품 구매, 수익 약속, 예측 서비스와는 무관합니다.
+        </p>
+        <ul class="heroList">
+          <li>실험 중심: 사용자가 직접 표본 수를 바꾸고 분포 변화를 관찰합니다.</li>
+          <li>설명 중심: 결과보다 해설을 먼저 보여 주어 왜곡된 해석을 줄입니다.</li>
+          <li>정책 투명성: 운영 정보, 광고 및 쿠키 안내, 개인정보처리방침을 본문에서 바로 확인할 수 있습니다.</li>
+        </ul>
       </div>
 
-      <div class="sectionGrid">
-      <article class="sectionCard" id="how">
-        <h3>서비스 소개</h3>
-        <p>LottoMind-AI는 로또/파워볼의 공개 기록을 기반으로 <b>빈도, 구간, 연속 패턴</b>을 요약하고, 해당 통계를 바탕으로
-          <b>가중치 샘플링 결과</b>를 참고용으로 제공합니다. 이 서비스는 교육/정보 목적이며, 당첨을 보장하지 않습니다.</p>
-        <div class="tagRow">
-          <span class="tag">통계 요약</span>
-          <span class="tag">패턴 시각화</span>
-          <span class="tag">가중치 샘플링</span>
-          <span class="tag">비보장</span>
+      <aside class="panel heroSide">
+        <div class="statCard">
+          <div class="statLabel">Primary Topic</div>
+          <div class="statValue">교육용 확률 실험</div>
+          <div class="statBody">동전, 주사위, 랜덤 워크를 이용해 표본과 분포의 관계를 설명합니다.</div>
         </div>
-      </article>
+        <div class="statCard">
+          <div class="statLabel">Ad Settings</div>
+          <div class="statValue">비개인화 요청</div>
+          <div class="statBody">광고는 비개인화 요청을 우선 적용하며, 페이지 본문이 있는 화면에서만 의미 있게 다룹니다.</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel">Value Promise</div>
+          <div class="statValue">설명 가능한 결과</div>
+          <div class="statBody">실험 로그, 분포 시각화, 해설 요약을 함께 제공해 결과 해석을 돕습니다.</div>
+        </div>
+      </aside>
+    </section>
 
-      <article class="sectionCard" id="data">
-        <h3>데이터 출처 & 범위</h3>
-        <p>공개 데이터 스냅샷을 로컬에 저장해 분석에 활용합니다. 스냅샷이 비어 있거나 갱신이 지연된 경우에는 샘플 데이터로만 통계를 보여줍니다.</p>
-        <div class="metricGrid">
-          <div class="metric">
-            <b>K-Lotto 스냅샷</b>
-            <span id="kDataStatus">확인 중…</span>
+    <div class="grid">
+      <main>
+        <section id="lab" class="panel section">
+          <div class="sectionHead">
+            <div>
+              <h2>실험실</h2>
+              <p>실험 종류와 표본 크기를 선택하면 브라우저에서 직접 시뮬레이션을 실행합니다. 데이터는 서버에 저장되지 않으며, 이 화면은 학습용 결과만 보여 줍니다.</p>
+            </div>
           </div>
-          <div class="metric">
-            <b>Powerball 스냅샷</b>
-            <span id="pbDataStatus">확인 중…</span>
+
+          <div class="controlGrid">
+            <div class="field">
+              <label for="experimentType">실험 종류</label>
+              <select id="experimentType">
+                <option value="coin">동전 던지기</option>
+                <option value="dice">주사위 분포</option>
+                <option value="walk">랜덤 워크</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="sampleSize">표본 크기</label>
+              <select id="sampleSize">
+                <option value="50">50회</option>
+                <option value="100">100회</option>
+                <option value="250" selected>250회</option>
+                <option value="500">500회</option>
+                <option value="1000">1,000회</option>
+              </select>
+            </div>
           </div>
-          <div class="metric">
-            <b>데이터 갱신</b>
-            <span id="dataUpdated">확인 중…</span>
+
+          <div class="actions">
+            <button id="runBtn" class="btn btnPrimary" type="button">실험 실행</button>
+            <button id="resetBtn" class="btn btnGhost" type="button">결과 초기화</button>
+            <span class="helper" id="modeHint">동전 던지기는 앞면/뒷면 비율과 연속 출현 길이를 확인합니다.</span>
           </div>
-        </div>
-        <div class="kv" style="margin-top:8px;">
-          <div>표시 기준</div>
-          <div>최근 회차 기준 200개 범위를 기본값으로 사용</div>
-          <div>빈도 계산</div>
-          <div>각 번호의 출현 횟수를 누적하여 상위/하위/미출현 기간을 산출</div>
-          <div>출처 표기</div>
-          <div>공개 데이터셋과 스냅샷 메타정보를 화면에 표시</div>
-        </div>
-      </article>
 
-      <article class="sectionCard" id="method">
-        <h3>방법론 요약</h3>
-        <p>분석은 다음 절차로 이루어집니다. 수학적 모델이나 예측 보장을 내세우지 않으며, 이해를 돕기 위한 <b>통계 요약</b>에 집중합니다.</p>
-        <div class="policyList">
-          <div class="policyItem"><b>1) 데이터 로딩</b>스냅샷에서 최근 회차를 가져오고, 오류 시 사용자에게 명확히 표시합니다.</div>
-          <div class="policyItem"><b>2) 빈도 계산</b>번호별 출현 횟수와 최근 미출현 기간을 계산합니다.</div>
-          <div class="policyItem"><b>3) 패턴 요약</b>연속 번호, 구간 분포(1-10, 11-20 등)를 집계합니다.</div>
-          <div class="policyItem"><b>4) 가중치 샘플링</b>빈도 기반 가중치를 적용해 참고용 조합을 생성합니다.</div>
-        </div>
-      </article>
+          <div class="results" aria-live="polite">
+            <div class="metric">
+              <b>핵심 지표</b>
+              <span id="metricA">-</span>
+            </div>
+            <div class="metric">
+              <b>보조 지표</b>
+              <span id="metricB">-</span>
+            </div>
+            <div class="metric">
+              <b>관찰 포인트</b>
+              <span id="metricC">-</span>
+            </div>
+            <div class="metric">
+              <b>표본 크기</b>
+              <span id="metricD">-</span>
+            </div>
+          </div>
 
-      <article class="sectionCard" id="guide">
-        <h3>이용 가이드</h3>
-        <p>이 서비스는 통계 공부와 데이터 관찰을 돕기 위해 설계되었습니다. 다음 지침을 지켜 안전하고 건강하게 이용하세요.</p>
-        <div class="policyList">
-          <div class="policyItem"><b>참고용 활용</b>추천 번호는 예측이 아닌 샘플링 결과입니다.</div>
-          <div class="policyItem"><b>자기 통제</b>예산을 미리 정하고, 감정적 구매를 피하세요.</div>
-          <div class="policyItem"><b>정보 검증</b>출처와 갱신일을 확인하고, 허위 정보는 신고해 주세요.</div>
-        </div>
-      </article>
+          <div class="viz">
+            <h3>분포 요약</h3>
+            <div id="bars" class="bars"></div>
+          </div>
 
-      <article class="sectionCard" id="faq">
-        <h3>FAQ</h3>
-        <div class="faqList">
-          <div class="faqItem"><b>Q. 당첨을 보장하나요?</b>A. 아니요. 본 서비스는 통계 요약과 참고용 샘플링만 제공합니다.</div>
-          <div class="faqItem"><b>Q. 데이터가 비어 있는 경우는?</b>A. 공개 스냅샷이 비어 있을 수 있으며, 이 경우 샘플 데이터로만 표시됩니다.</div>
-          <div class="faqItem"><b>Q. 광고는 어디에 노출되나요?</b>A. 본문 콘텐츠가 충분한 화면에서만 광고가 노출되도록 구성합니다.</div>
-        </div>
-      </article>
+          <div class="viz">
+            <h3>해설</h3>
+            <p id="insight" class="helper">실험을 실행하면 결과 해설이 여기에 표시됩니다.</p>
+          </div>
 
-      <article class="sectionCard" id="responsible">
-        <h3>책임 있는 이용</h3>
-        <p>로또 및 파워볼은 확률 기반의 게임입니다. 과도한 구매는 재정적 위험을 초래할 수 있으며, 반드시 책임 있는 판단이 필요합니다.</p>
-        <div class="policyList">
-          <div class="policyItem"><b>예산 한도 설정</b>월 단위 예산을 사전에 정하고 초과 사용을 금지합니다.</div>
-          <div class="policyItem"><b>심리적 경고 신호</b>손실 회복 목적의 구매, 불안감, 충동이 느껴진다면 즉시 중단하세요.</div>
-          <div class="policyItem"><b>상담 리소스</b>필요 시 지역 중독 예방 센터나 상담 채널을 활용하세요.</div>
-        </div>
-      </article>
+          <div id="log" class="log">[system] 대기 중... 실험 종류를 선택한 뒤 "실험 실행"을 누르세요.</div>
+        </section>
 
-      <article class="sectionCard" id="policy">
-        <h3>정책/약관 요약</h3>
-        <p>아래 내용은 요약이며, 서비스 이용 시 본문을 반드시 확인해 주세요.</p>
-        <div class="policyList">
-          <div class="policyItem"><b>콘텐츠 품질</b>독창적 설명, 데이터 출처, 방법론, 책임 있는 이용 안내를 제공합니다.</div>
-          <div class="policyItem"><b>광고 배치</b>콘텐츠가 없는 화면이나 오해를 유발하는 위치에 광고를 노출하지 않습니다.</div>
-          <div class="policyItem"><b>개인정보</b>문의/댓글 입력값은 Formspree로 전송되며, 저장 목적과 범위를 안내합니다.</div>
-        </div>
-      </article>
+        <section id="guide" class="panel section">
+          <div class="sectionHead">
+            <div>
+              <h2>학습 가이드</h2>
+              <p>이 페이지는 숫자 자체보다 결과가 만들어지는 과정을 이해하는 데 초점을 둡니다. 아래 세 가지 질문을 염두에 두고 보면 학습 효율이 높습니다.</p>
+            </div>
+          </div>
+          <div class="cardList">
+            <article class="infoCard">
+              <h3>1. 표본이 작을 때 왜 결과가 흔들릴까?</h3>
+              <p>표본 수가 적으면 우연한 편차가 크게 보입니다. 그래서 짧은 실험에서는 특정 결과가 과대표현되기 쉽습니다.</p>
+            </article>
+            <article class="infoCard">
+              <h3>2. 비율이 50:50에 가까워지는 이유는?</h3>
+              <p>표본 수가 늘어날수록 평균적인 분포에 수렴하는 경향이 나타납니다. 이는 확률 수업에서 자주 다루는 큰 수의 법칙과 연결됩니다.</p>
+            </article>
+            <article class="infoCard">
+              <h3>3. 긴 연속 구간은 왜 생길까?</h3>
+              <p>무작위 과정에서도 앞면이 여러 번 연속으로 나오거나 한 방향으로만 이동하는 구간이 자연스럽게 나타납니다. 연속 구간 자체가 예측 가능성을 뜻하지는 않습니다.</p>
+            </article>
+          </div>
+        </section>
 
-      <article class="sectionCard full" id="privacy">
-        <h3>개인정보 처리방침</h3>
-        <p>본 서비스는 최소한의 정보만 수집하며, 사용 목적과 보관 범위를 투명하게 고지합니다.</p>
-        <div class="policyList">
-          <div class="policyItem"><b>수집 항목</b>문의/댓글 폼에 입력한 이름, 이메일, 메시지(선택 포함)</div>
-          <div class="policyItem"><b>수집 목적</b>문의 응답 및 피드백 확인, 서비스 품질 개선</div>
-          <div class="policyItem"><b>보관 기간</b>문의 처리 완료 후 합리적 기간 내 파기(외부 폼 제공자 정책 준수)</div>
-          <div class="policyItem"><b>쿠키 및 광고</b>Google AdSense 광고가 쿠키 또는 광고 식별자를 사용할 수 있으며, 맞춤형 광고 설정은 브라우저/Google 계정에서 관리 가능합니다.</div>
-          <div class="policyItem"><b>로컬 저장</b>댓글 목록은 브라우저 `localStorage`에만 저장되어 서버에 직접 저장되지 않습니다.</div>
-        </div>
-      </article>
+        <section id="method" class="panel section">
+          <div class="sectionHead">
+            <div>
+              <h2>방법론</h2>
+              <p>모든 실험은 브라우저 내 자바스크립트 난수와 단순 집계 로직으로 동작합니다. 외부 데이터 수집이나 사용자별 프로파일링 없이 같은 규칙을 모든 방문자에게 동일하게 적용합니다.</p>
+            </div>
+          </div>
+          <div class="policyGrid">
+            <article class="policy">
+              <h3>동전 던지기</h3>
+              <p>각 시행에서 0 또는 1을 같은 확률로 생성하고, 앞면 비율과 최장 연속 길이를 계산합니다.</p>
+            </article>
+            <article class="policy">
+              <h3>주사위 분포</h3>
+              <p>1부터 6까지 같은 확률로 생성하고 각 면의 출현 횟수와 평균값, 최빈값을 계산합니다.</p>
+            </article>
+            <article class="policy">
+              <h3>랜덤 워크</h3>
+              <p>각 단계에서 +1 또는 -1을 선택하여 누적 위치를 계산하고, 최종 위치와 최대 편차를 측정합니다.</p>
+            </article>
+            <article class="policy">
+              <h3>해설 원칙</h3>
+              <p>결과는 교육용 해설이며, 투자·베팅·수익 예측과 같은 의사결정을 돕기 위한 서비스가 아닙니다.</p>
+            </article>
+          </div>
+        </section>
+      </main>
 
-      <article class="sectionCard full" id="terms">
-        <h3>이용약관</h3>
-        <p>서비스 이용자는 다음 약관에 동의합니다. 본 서비스는 정보 제공 목적이며, 어떤 형태의 당첨 보장도 하지 않습니다.</p>
-        <div class="policyList">
-          <div class="policyItem"><b>책임 제한</b>통계 요약 및 샘플링 결과는 참고용이며, 이를 통한 손익에 대해 책임지지 않습니다.</div>
-          <div class="policyItem"><b>금지 행위</b>부정확한 정보 유포, 서비스 방해, 불법적 도박 유도 콘텐츠 게시</div>
-          <div class="policyItem"><b>콘텐츠 저작권</b>사이트의 텍스트/디자인은 보호되며 무단 복제를 금지합니다.</div>
-          <div class="policyItem"><b>약관 변경</b>정책 변경 시 변경 내역을 변경 로그에 고지합니다.</div>
-        </div>
-      </article>
+      <aside>
+        <section class="panel section">
+          <div class="sectionHead">
+            <div>
+              <h2>운영 정보</h2>
+              <p>페이지 목적과 외부 서비스 사용 범위를 투명하게 고지합니다.</p>
+            </div>
+          </div>
+          <div class="cardList">
+            <article class="infoCard">
+              <h3>페이지 목적</h3>
+              <p>기초 확률과 표본 해석을 설명하는 교육형 실험 페이지입니다.</p>
+            </article>
+            <article class="infoCard">
+              <h3>외부 서비스</h3>
+              <p>Google Analytics, Google AdSense, Formspree를 사용합니다. 광고는 비개인화 요청을 우선 적용합니다.</p>
+            </article>
+            <article class="infoCard">
+              <h3>콘텐츠 원칙</h3>
+              <p>고수익, 결과 보장, 특정 행동 유도, 공식 제휴 암시 표현을 사용하지 않습니다.</p>
+            </article>
+          </div>
+        </section>
 
-      <article class="sectionCard full" id="changelog">
-        <h3>변경 로그</h3>
-        <div class="kv">
-          <div>2026-03-13</div>
-          <div>콘텐츠 허브, 정책/약관 요약, 책임 있는 이용 가이드를 추가하고 데이터 출처 표시를 강화했습니다.</div>
-          <div>2026-02-24</div>
-          <div>Powerball 스냅샷을 갱신하고 메타 정보를 표기했습니다.</div>
-        </div>
-        <div class="note" id="todayStamp">오늘 날짜 기준으로 자동 표기됩니다.</div>
-      </article>
-      </div>
+        <section id="policy" class="panel section">
+          <div class="sectionHead">
+            <div>
+              <h2>운영 정책</h2>
+              <p>게시자 콘텐츠와 광고, 개인정보 고지에 관한 핵심 정책입니다.</p>
+            </div>
+          </div>
+          <div class="cardList">
+            <article class="policy">
+              <h3>콘텐츠 품질</h3>
+              <p>설명 중심의 독창적 본문과 직접 실행 가능한 실험 결과를 제공합니다.</p>
+            </article>
+            <article class="policy">
+              <h3>광고 맥락</h3>
+              <p>게시자 콘텐츠가 없는 화면, 로딩 전용 화면, 탐색 전용 화면에 광고를 두지 않는 것을 원칙으로 합니다.</p>
+            </article>
+            <article class="policy">
+              <h3>오해 방지</h3>
+              <p>금전적 보상, 단기 수익, 과도한 행동 유도, 특정 결과 보장을 암시하는 표현은 사용하지 않습니다.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel section">
+          <div class="sectionHead">
+            <div>
+              <h2>광고 및 쿠키 안내</h2>
+              <p>Google 제품 사용에 따른 데이터 수집과 광고 설정 관련 안내입니다.</p>
+            </div>
+          </div>
+          <div class="cardList">
+            <article class="policy">
+              <h3>수집될 수 있는 정보</h3>
+              <p>광고 및 측정 과정에서 쿠키, 웹 비콘, IP 주소, 브라우저 정보 등 식별자가 사용될 수 있습니다.</p>
+            </article>
+            <article class="policy">
+              <h3>Google 데이터 사용 방식</h3>
+              <p><a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">Google 파트너 사이트 또는 앱 사용 시 Google의 데이터 사용 방식</a>을 확인할 수 있습니다.</p>
+            </article>
+            <article class="policy">
+              <h3>광고 설정 관리</h3>
+              <p><a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google 광고 설정</a>과 <a href="https://optout.aboutads.info/" target="_blank" rel="noopener noreferrer">Digital Advertising Alliance</a>에서 일부 설정을 관리할 수 있습니다.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="privacy" class="panel section">
+          <div class="sectionHead">
+            <div>
+              <h2>개인정보처리방침</h2>
+              <p>최소한의 정보만 수집하며, 수집 목적과 외부 처리자를 공개합니다.</p>
+            </div>
+          </div>
+          <div class="cardList">
+            <article class="policy">
+              <h3>문의 폼 수집 항목</h3>
+              <p>이름, 이메일, 메시지. 문의 응답과 운영 피드백 확인 목적으로만 사용합니다.</p>
+            </article>
+            <article class="policy">
+              <h3>외부 처리자</h3>
+              <p>문의 데이터는 Formspree를 통해 전송될 수 있으며, <a href="https://formspree.io/legal/privacy-policy/" target="_blank" rel="noopener noreferrer">Formspree 개인정보처리방침</a>의 적용을 받을 수 있습니다.</p>
+            </article>
+            <article class="policy">
+              <h3>광고 관련 고지</h3>
+              <p>웹사이트에 게재된 광고로 인해 제3자가 쿠키를 설정하거나 읽고, 웹 비콘 또는 IP 주소를 통해 정보를 수집할 수 있습니다.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="contact" class="panel section">
+          <div class="sectionHead">
+            <div>
+              <h2>문의</h2>
+              <p>오류 제보, 콘텐츠 개선 의견, 정책 관련 문의를 받을 수 있습니다.</p>
+            </div>
+          </div>
+          <div class="contactBox">
+            <form action="https://formspree.io/f/maqddppl" method="POST">
+              <div class="field">
+                <label for="contactName">이름</label>
+                <input id="contactName" name="name" type="text" placeholder="이름을 입력하세요" required />
+              </div>
+              <div class="field">
+                <label for="contactEmail">이메일</label>
+                <input id="contactEmail" name="email" type="email" placeholder="답변 받을 이메일" required />
+              </div>
+              <div class="field">
+                <label for="contactMessage">메시지</label>
+                <textarea id="contactMessage" name="message" placeholder="문의 내용을 적어주세요" required></textarea>
+              </div>
+              <div class="actions" style="margin-top:12px;margin-bottom:0">
+                <button class="btn btnPrimary" type="submit">문의 보내기</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </aside>
     </div>
-  </section>
 
-  <div class="disclaimer">
-    본 서비스는 통계 기반 분석 및 참고용 추천 번호를 제공하며, 당첨을 보장하지 않습니다.<br>
-    로또 구매는 개인의 판단과 책임하에 진행하시기 바랍니다.
+    <footer class="footer">
+      <div>© 2026 Open Pattern Lab. 교육형 확률 실험과 설명형 콘텐츠 제공.</div>
+      <div>실험 결과는 학습용 예시이며, 특정 상품 구매나 수익 판단을 위한 정보가 아닙니다.</div>
+    </footer>
   </div>
-  <div id="powerballDisclaimer" class="disclaimer isHidden">
-    Powerball 모드는 무작위 샘플링 및 통계 참고용이며, 당첨을 보장하지 않습니다.<br>
-    본 서비스는 Powerball 및 관련 기관과 무관합니다.
-  </div>
 
-  <footer class="footer" aria-label="사이트 푸터">
-    <div>© 2026 LottoMind-AI. 통계 요약과 참고용 분석 제공.</div>
-    <div>
-      <a href="#policy">정책 요약</a> ·
-      <a href="#privacy">개인정보</a> ·
-      <a href="#terms">이용약관</a> ·
-      <a href="#responsible">책임 있는 이용</a> ·
-      <a href="#contact">문의</a>
-    </div>
-  </footer>
-</div>
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+      const experimentType = $("experimentType");
+      const sampleSize = $("sampleSize");
+      const runBtn = $("runBtn");
+      const resetBtn = $("resetBtn");
+      const bars = $("bars");
+      const metricA = $("metricA");
+      const metricB = $("metricB");
+      const metricC = $("metricC");
+      const metricD = $("metricD");
+      const insight = $("insight");
+      const log = $("log");
+      const modeHint = $("modeHint");
 
-<!-- HUD -->
-<div id="hud" class="hud hidden" aria-hidden="true">
-  <div class="hudBg"></div>
-  <div class="hudFrame" id="hudFrame">
-    <div class="hudTop">
-      <div class="hudTitle">
-        <span class="dot"></span>
-        <span class="mono">LOTTO COMPUTE SEQUENCE</span>
-      </div>
-      <button class="hudClose" id="hudClose">✕</button>
-    </div>
+      function writeLog(lines){
+        log.textContent = lines.join("\n");
+      }
 
-    <div class="hudBody">
-      <div class="hudLeft">
-        <div class="robot">
-          <div class="antenna"></div>
-          <div class="head">
-            <div class="visor"><div class="scanline"></div></div>
-            <div class="eyes"><span></span><span></span><span></span></div>
-          </div>
-          <div class="neck"></div>
-          <div class="torso">
-            <div class="core"></div>
-            <div class="bars"><i></i><i></i><i></i><i></i><i></i></div>
-          </div>
-          <div class="arms">
-            <div class="arm left"><b></b><b></b><b></b></div>
-            <div class="arm right"><b></b><b></b><b></b></div>
-          </div>
-        </div>
+      function formatPct(value){
+        return `${(value * 100).toFixed(1)}%`;
+      }
 
-        <div class="hudMeter">
-          <div class="meterLabel mono">
-            <span>PROCESS</span>
-            <span id="hudPct">0%</span>
-          </div>
-          <div class="meterTrack"><div id="hudBar" class="meterBar"></div></div>
-          <div class="meterSub mono" id="hudStep">BOOTING…</div>
-        </div>
-      </div>
+      function setBars(items){
+        bars.innerHTML = "";
+        items.forEach(({label, value, display}) => {
+          const row = document.createElement("div");
+          row.className = "barRow";
+          row.innerHTML = `
+            <div>${label}</div>
+            <div class="barTrack"><div class="barFill" style="width:${Math.max(2, value * 100)}%"></div></div>
+            <div>${display}</div>
+          `;
+          bars.appendChild(row);
+        });
+      }
 
-      <div class="hudRight">
-        <div class="hudConsole mono" id="hudConsole"></div>
-        <div class="powerballLoader" id="powerballLoader" aria-hidden="true">
-          <div class="powerballBall">PB</div>
-          <div class="powerballTrail">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <div class="powerballLabel mono">POWERBALL SPINNING…</div>
-        </div>
-        <div class="hudMini">
-          <div class="miniCard">
-            <div class="miniTitle mono">SIGNAL</div>
-            <div class="miniValue" id="sig">—</div>
-          </div>
-          <div class="miniCard">
-            <div class="miniTitle mono">SEED</div>
-            <div class="miniValue" id="seed">—</div>
-          </div>
-          <div class="miniCard">
-            <div class="miniTitle mono">MODE</div>
-            <div class="miniValue">WEIGHTED</div>
-          </div>
-        </div>
-      </div>
-    </div>
+      function longestStreak(values){
+        let best = 1;
+        let current = 1;
+        for (let i = 1; i < values.length; i += 1){
+          if (values[i] === values[i - 1]) {
+            current += 1;
+            best = Math.max(best, current);
+          } else {
+            current = 1;
+          }
+        }
+        return values.length ? best : 0;
+      }
 
-    <div class="hudBottom mono">
-      <span class="glow">SCANNING PROBABILITY FIELD…</span>
-      <span id="hudHint">에너지를 응축 중…</span>
-    </div>
-  </div>
-</div>
+      function runCoin(size){
+        const flips = Array.from({ length: size }, () => Math.random() < 0.5 ? "앞면" : "뒷면");
+        const heads = flips.filter((item) => item === "앞면").length;
+        const tails = size - heads;
+        const streak = longestStreak(flips);
+        metricA.textContent = `${formatPct(heads / size)} 앞면`;
+        metricB.textContent = `${formatPct(tails / size)} 뒷면`;
+        metricC.textContent = `최장 연속 ${streak}회`;
+        metricD.textContent = `${size}회`;
+        setBars([
+          { label: "앞면", value: heads / size, display: `${heads}` },
+          { label: "뒷면", value: tails / size, display: `${tails}` }
+        ]);
+        insight.textContent = `동전 던지기 ${size}회에서는 앞면과 뒷면 비율이 완벽히 같지 않아도 자연스럽습니다. 표본 수가 커질수록 두 비율은 50% 부근으로 가까워지는 경향을 보입니다. 이번 실험에서는 최장 연속 구간이 ${streak}회였으며, 이런 연속 출현도 무작위 과정에서 자주 나타납니다.`;
+        writeLog([
+          "[experiment] coin flip",
+          `[sample] ${size}`,
+          `[heads] ${heads}`,
+          `[tails] ${tails}`,
+          `[longest_streak] ${streak}`,
+          `[note] 짧은 표본에서는 한쪽이 더 많이 나와도 이상하지 않습니다.`
+        ]);
+      }
 
-<div id="resultModal" class="resultModal hidden" aria-hidden="true">
-  <div class="resultBackdrop"></div>
-  <div class="resultFrame" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
-    <div class="resultHead">
-      <div>
-        <div id="resultEyebrow" class="resultEyebrow">Lucky Result Window</div>
-        <h2 id="resultTitle" class="resultTitle">대박기원 추천 번호</h2>
-        <p id="resultDesc" class="resultDesc">최신 스냅샷 기반으로 정리한 참고용 조합입니다.</p>
-      </div>
-      <button id="resultClose" class="resultClose" type="button" aria-label="결과 창 닫기">✕</button>
-    </div>
-    <div class="resultGrid">
-      <div class="resultMainCard">
-        <p class="resultWish">오늘의 대박기원. 너무 많은 줄보다 손에 꽂히는 조합 몇 줄만 차분히 보세요.</p>
-        <div id="resultTickets" class="resultTickets"></div>
-      </div>
-      <div class="resultSideCard">
-        <div id="resultFortune"></div>
-        <p class="resultCaption">추천 번호는 통계 기반 참고용 샘플링 결과입니다. 실제 구매 판단은 본인 책임으로 진행하세요.</p>
-      </div>
-    </div>
-  </div>
-</div>
+      function runDice(size){
+        const counts = Array.from({ length: 6 }, () => 0);
+        const rolls = [];
+        for (let i = 0; i < size; i += 1){
+          const roll = 1 + Math.floor(Math.random() * 6);
+          counts[roll - 1] += 1;
+          rolls.push(roll);
+        }
+        const mean = rolls.reduce((sum, value) => sum + value, 0) / rolls.length;
+        const maxCount = Math.max(...counts);
+        const mode = counts.findIndex((count) => count === maxCount) + 1;
+        const spread = maxCount - Math.min(...counts);
+        metricA.textContent = `평균 ${mean.toFixed(2)}`;
+        metricB.textContent = `최빈값 ${mode}`;
+        metricC.textContent = `최대 편차 ${spread}`;
+        metricD.textContent = `${size}회`;
+        setBars(counts.map((count, idx) => ({
+          label: `${idx + 1}면`,
+          value: count / size,
+          display: `${count}`
+        })));
+        insight.textContent = `주사위 ${size}회 실험에서는 각 면이 정확히 같은 횟수로 나오지 않더라도 정상입니다. 평균값은 3.5에 가까워지는 경향이 있고, 면별 편차는 표본 수가 늘어날수록 상대적으로 줄어듭니다. 이번 실험의 최빈값은 ${mode}였고, 가장 많이 나온 면과 가장 적게 나온 면의 차이는 ${spread}회였습니다.`;
+        writeLog([
+          "[experiment] dice distribution",
+          `[sample] ${size}`,
+          `[mean] ${mean.toFixed(4)}`,
+          `[mode] ${mode}`,
+          `[spread] ${spread}`,
+          `[counts] ${counts.join(", ")}`
+        ]);
+      }
 
-<script>
-(() => {
-  // ===== Config =====
-  // 동행복권 JSON endpoint (proxy가 대신 호출)
-  // https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=회차
-  const ROBOT = "LottoMind-AI";
-  const HISTORY_SIZE = 200;
-  const SNAPSHOT_URL = "data/lotto_draws.json";
-  const POWERBALL_SNAPSHOT_URL = "data/powerball_draws.json";
-  const POWERBALL_FORMAT_START = "2015-10-07";
-  const $ = (id) => document.getElementById(id);
+      function runWalk(size){
+        let position = 0;
+        let maxDistance = 0;
+        let positive = 0;
+        let negative = 0;
+        const checkpoints = [0, 0, 0, 0];
+        for (let i = 0; i < size; i += 1){
+          const step = Math.random() < 0.5 ? -1 : 1;
+          position += step;
+          if (step > 0) positive += 1;
+          else negative += 1;
+          maxDistance = Math.max(maxDistance, Math.abs(position));
+          if (i === Math.floor(size * 0.24)) checkpoints[0] = position;
+          if (i === Math.floor(size * 0.49)) checkpoints[1] = position;
+          if (i === Math.floor(size * 0.74)) checkpoints[2] = position;
+          if (i === size - 1) checkpoints[3] = position;
+        }
+        metricA.textContent = `최종 위치 ${position}`;
+        metricB.textContent = `최대 편차 ${maxDistance}`;
+        metricC.textContent = `+ ${positive} / - ${negative}`;
+        metricD.textContent = `${size}단계`;
+        const normalized = checkpoints.map((point) => Math.min(1, Math.abs(point) / Math.max(1, maxDistance)));
+        setBars([
+          { label: "25%", value: normalized[0], display: `${checkpoints[0]}` },
+          { label: "50%", value: normalized[1], display: `${checkpoints[1]}` },
+          { label: "75%", value: normalized[2], display: `${checkpoints[2]}` },
+          { label: "100%", value: normalized[3], display: `${checkpoints[3]}` }
+        ]);
+        insight.textContent = `랜덤 워크는 한 단계씩 우연히 이동하는 과정을 보여 주는 기본 모델입니다. 중간에 한 방향으로 길게 이동하더라도, 그것이 다음 단계의 방향을 보장하지는 않습니다. 이번 실험에서는 ${size}단계 후 최종 위치가 ${position}이었고, 시작점에서 가장 멀어진 거리는 ${maxDistance}였습니다.`;
+        writeLog([
+          "[experiment] random walk",
+          `[sample] ${size}`,
+          `[final_position] ${position}`,
+          `[max_distance] ${maxDistance}`,
+          `[positive_steps] ${positive}`,
+          `[negative_steps] ${negative}`
+        ]);
+      }
 
-  const logEl = $("log");
-  const hotEl = $("hot");
-  const coldEl = $("cold");
-  const overdueEl = $("overdue");
-  const patternEl = $("pattern");
-  const pbWhiteHotEl = $("pbWhiteHot");
-  const pbWhiteColdEl = $("pbWhiteCold");
-  const pbWhiteOverdueEl = $("pbWhiteOverdue");
-  const pbRedStatsEl = $("pbRedStats");
-  const recoEl = $("reco");
-  const statusEl = $("status");
-  const kpiRow = $("kpiRow");
-  const commentForm = $("commentForm");
-  const commentList = $("commentList");
-  const commentClearAll = $("commentClearAll");
-  const descMain = $("descMain");
-  const powerballDisclaimer = $("powerballDisclaimer");
-  const kDataStatus = $("kDataStatus");
-  const pbDataStatus = $("pbDataStatus");
-  const dataUpdated = $("dataUpdated");
-  const todayStamp = $("todayStamp");
+      function updateHint(){
+        const mode = experimentType.value;
+        if (mode === "coin") modeHint.textContent = "동전 던지기는 앞면/뒷면 비율과 연속 출현 길이를 확인합니다.";
+        if (mode === "dice") modeHint.textContent = "주사위 분포는 면별 빈도, 평균값, 편차를 비교합니다.";
+        if (mode === "walk") modeHint.textContent = "랜덤 워크는 단계별 누적 이동과 최대 편차를 관찰합니다.";
+      }
 
-  const btnGenerate = $("btnGenerate");
-  const lineCountEl = $("lineCount");
-  const lotteryTypeEl = $("lotteryType");
-  const birthDateEl = $("birthDate");
-  const birthGenderEl = $("birthGender");
-  const birthCalendarEl = $("birthCalendar");
-  const birthHourEl = $("birthHour");
-  const modeNote = $("modeNote");
-  const analysisCards = document.querySelectorAll(".analysisCard");
-  const powerballCards = document.querySelectorAll(".powerballCard");
-  const themeToggle = $("themeToggle");
-  const hubToggle = $("hubToggle");
-  const hubBody = $("hubBody");
+      function resetView(){
+        metricA.textContent = "-";
+        metricB.textContent = "-";
+        metricC.textContent = "-";
+        metricD.textContent = "-";
+        bars.innerHTML = "";
+        insight.textContent = "실험을 실행하면 결과 해설이 여기에 표시됩니다.";
+        log.textContent = '[system] 대기 중... 실험 종류를 선택한 뒤 "실험 실행"을 누르세요.';
+      }
 
-  // HUD
-  const hud = $("hud");
-  const hudClose = $("hudClose");
-  const hudBar = $("hudBar");
-  const hudPct = $("hudPct");
-  const hudStep = $("hudStep");
-  const hudConsole = $("hudConsole");
-  const hudHint = $("hudHint");
-  const sigEl = $("sig");
-  const seedEl = $("seed");
-  const hudFrame = $("hudFrame");
-  const powerballLoader = $("powerballLoader");
-  const resultModal = $("resultModal");
-  const resultClose = $("resultClose");
-  const resultEyebrow = $("resultEyebrow");
-  const resultTitleEl = $("resultTitle");
-  const resultDescEl = $("resultDesc");
-  const resultTicketsEl = $("resultTickets");
-  const resultFortuneEl = $("resultFortune");
-
-  let dataCache = [];       // [{round, nums}]
-  let generatedCache = [];  // [{round, nums}] generated picks for live stats
-  let baseLastRound = 0;
-  let weightsCache = null;  // 1..45 weights
-  let pbDataCache = [];      // [{date, white, power}]
-  let pbWeightsWhite = null; // 1..69 weights
-  let pbWeightsRed = null;   // 1..26 weights
-  let dataSourceLabel = "SYNTHETIC";
-  let snapshotMeta = null;
-  let pbSnapshotMeta = null;
-  const fortuneBirthKey = "lottoFortuneBirthDate";
-  const fortuneGenderKey = "lottoFortuneGender";
-  const fortuneCalendarKey = "lottoFortuneCalendar";
-  const fortuneHourKey = "lottoFortuneBirthHour";
-
-  // ===== Theme =====
-  const themeKey = "lottoTheme";
-  const commentKey = "lottoComments";
-  function applyTheme(theme){
-    const next = theme === "light" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    themeToggle.textContent = next === "light" ? "다크 모드" : "화이트 모드";
-    themeToggle.setAttribute("aria-pressed", next === "light");
-    localStorage.setItem(themeKey, next);
-  }
-  function initTheme(){
-    const saved = localStorage.getItem(themeKey);
-    const initial = saved || "light";
-    applyTheme(initial);
-  }
-  function initFortuneProfile(){
-    const savedBirth = localStorage.getItem(fortuneBirthKey);
-    const savedGender = localStorage.getItem(fortuneGenderKey);
-    const savedCalendar = localStorage.getItem(fortuneCalendarKey);
-    const savedHour = localStorage.getItem(fortuneHourKey);
-    if (savedBirth && birthDateEl) birthDateEl.value = savedBirth;
-    if (savedGender && birthGenderEl) birthGenderEl.value = savedGender;
-    if (savedCalendar && birthCalendarEl) birthCalendarEl.value = savedCalendar;
-    if (savedHour !== null && savedHour !== "" && birthHourEl) birthHourEl.value = savedHour;
-  }
-  function persistFortuneProfile(){
-    if (!birthDateEl || !birthHourEl || !birthGenderEl || !birthCalendarEl) return;
-    if (birthDateEl.value) localStorage.setItem(fortuneBirthKey, birthDateEl.value);
-    else localStorage.removeItem(fortuneBirthKey);
-    localStorage.setItem(fortuneGenderKey, birthGenderEl.value || "female");
-    localStorage.setItem(fortuneCalendarKey, birthCalendarEl.value || "solar");
-    localStorage.setItem(fortuneHourKey, birthHourEl.value || "o");
-  }
-  function loadComments(){
-    try {
-      const raw = localStorage.getItem(commentKey);
-      const arr = JSON.parse(raw || "[]");
-      return Array.isArray(arr) ? arr : [];
-    } catch {
-      return [];
-    }
-  }
-  function saveComments(arr){
-    const trimmed = arr.slice(-200);
-    localStorage.setItem(commentKey, JSON.stringify(trimmed));
-  }
-  function renderComments(){
-    if (!commentList) return;
-    const items = loadComments();
-    commentList.innerHTML = "";
-    if (!items.length){
-      const empty = document.createElement("div");
-      empty.className = "muted";
-      empty.textContent = "아직 댓글이 없습니다.";
-      commentList.appendChild(empty);
-      return;
-    }
-    items.slice().reverse().forEach((it) => {
-      const index = items.indexOf(it);
-      const wrap = document.createElement("div");
-      wrap.className = "commentItem";
-
-      const meta = document.createElement("div");
-      meta.className = "commentMeta";
-      const name = document.createElement("span");
-      name.textContent = it.name || "익명";
-      const time = document.createElement("span");
-      const d = new Date(it.ts);
-      time.textContent = isNaN(d.getTime()) ? "" : d.toLocaleString();
-      meta.append(name, time);
-
-      const body = document.createElement("div");
-      body.className = "commentBody";
-      body.textContent = it.body || "";
-
-      const del = document.createElement("button");
-      del.className = "commentDelete";
-      del.type = "button";
-      del.textContent = "삭제";
-      del.addEventListener("click", () => {
-        const current = loadComments();
-        current.splice(index, 1);
-        saveComments(current);
-        renderComments();
+      runBtn.addEventListener("click", () => {
+        const size = Number(sampleSize.value || 250);
+        const mode = experimentType.value;
+        if (mode === "coin") runCoin(size);
+        if (mode === "dice") runDice(size);
+        if (mode === "walk") runWalk(size);
       });
 
-      wrap.append(meta, body, del);
-      commentList.appendChild(wrap);
-    });
-  }
-
-  // ===== Utilities =====
-  const robot = (msg) => {
-    const t = new Date().toLocaleTimeString();
-    logEl.textContent += `[${ROBOT} ${t}] ${msg}\n`;
-    logEl.scrollTop = logEl.scrollHeight;
-  };
-
-  const chip = (title, value) => {
-    const div = document.createElement("div");
-    div.className = "chip";
-    div.innerHTML = `<b>${title}</b> <span class="muted">${value}</span>`;
-    return div;
-  };
-
-  const balls = (nums) => {
-    const wrap = document.createElement("div");
-    wrap.className = "nums";
-    nums.forEach((n, i) => {
-      const b = document.createElement("div");
-      b.className = "ball";
-      b.textContent = n;
-      b.style.animationDelay = `${i * 0.08}s`;
-      wrap.appendChild(b);
-    });
-    return wrap;
-  };
-
-  function parseBirthProfile(){
-    if (!birthDateEl) return null;
-    const birthValue = birthDateEl.value;
-    if (!birthValue) return null;
-    const parts = birthValue.split("-").map(Number);
-    if (parts.length !== 3 || parts.some((n)=>!Number.isFinite(n))) return null;
-    const [year, month, day] = parts;
-    return {
-      year,
-      month,
-      day,
-      gender: birthGenderEl?.value || "female",
-      calendar: birthCalendarEl?.value || "solar",
-      hour: birthHourEl?.value || "o",
-    };
-  }
-
-  function buildMoneyFortune(lines, mode){
-    const profile = parseBirthProfile();
-    if (!profile){
-      return {
-        tag: "LUCKY CASH",
-        score: "--",
-        level: "생일을 넣으면 금전운 활성화",
-        copy: "생년월일과 태어난 시를 입력하면 오늘 기준 금전운을 네잎클로버 카드로 계산합니다.",
-        meta: [],
-      };
-    }
-    const hourSeedMap = {
-      ja: 11,
-      chuk: 17,
-      in: 23,
-      myo: 29,
-      jin: 31,
-      sa: 37,
-      o: 41,
-      mi: 43,
-      sin: 47,
-      yu: 53,
-      sul: 59,
-      hae: 61,
-    };
-    const flatNums = lines.flat();
-    const now = new Date();
-    const sum = flatNums.reduce((acc, value, idx) => acc + value * (idx + 2), 0);
-    const lineWeight = lines.reduce((acc, nums, idx) => acc + nums.reduce((lineAcc, n) => lineAcc + n, 0) * (idx + 1), 0);
-    const genderSeed = profile.gender === "male" ? 19 : 7;
-    const calendarSeed = profile.calendar === "lunar" ? 27 : 9;
-    const hourSeed = hourSeedMap[profile.hour] || 41;
-    const birthSeed = (profile.year % 100) * 13 + profile.month * 17 + profile.day * 19 + hourSeed + genderSeed + calendarSeed;
-    const dateSeed = now.getFullYear() * 3 + (now.getMonth() + 1) * 29 + now.getDate() * 31;
-    const modeSeed = mode === "powerball" ? 33 : 15;
-    const rawScore = (birthSeed + dateSeed + sum + lineWeight + modeSeed) % 41;
-    const score = 60 + rawScore;
-
-    let level = "클로버 휴면기";
-    let copy = "지출을 줄이고 작은 적립이나 할인 혜택부터 챙기면 손실을 줄이는 흐름입니다.";
-    if (score >= 92){
-      level = "황금 네잎클로버";
-      copy = "작은 금액도 흐름이 크게 붙는 날입니다. 보관 중인 포인트나 묵은 환급금을 먼저 확인해보세요.";
-    } else if (score >= 84){
-      level = "행운 급상승";
-      copy = "뜻밖의 절약 운이 강합니다. 오늘은 할인, 쿠폰, 중고 거래처럼 바로 체감되는 금전운이 좋습니다.";
-    } else if (score >= 75){
-      level = "잔잔한 수확운";
-      copy = "큰 한 방보다 안정적인 이득에 유리합니다. 생활비 정리나 자동이체 점검이 잘 맞는 흐름입니다.";
-    }
-
-    return {
-      tag: "LUCKY CASH",
-      score: `${score}점`,
-      level,
-      copy,
-      meta: [
-        profile.gender === "male" ? "남성" : "여성",
-        profile.calendar === "lunar" ? "음력" : "양력",
-        birthHourEl?.selectedOptions?.[0]?.textContent?.split(" ")[0] || "오시",
-        `${lines.length}줄 통합 금전운`,
-      ],
-    };
-  }
-
-  function createFortuneBadge(fortune){
-    const badge = document.createElement("div");
-    badge.className = "fortuneBadge";
-    badge.innerHTML = `
-      <div class="fortuneTop">
-        <span class="fortuneTag">${fortune.tag}</span>
-        <span class="fortuneScore">${fortune.score}</span>
-      </div>
-      <div class="fortuneLevel">오늘의 금전운 · ${fortune.level}</div>
-      <p class="fortuneCopy">${fortune.copy}</p>
-      <div class="fortuneMeta">${(fortune.meta || []).map((item) => `<span>${item}</span>`).join("")}</div>
-    `;
-    return badge;
-  }
-  function createResultTicket(label, nums, mode){
-    const card = document.createElement("div");
-    card.className = "resultTicket";
-    const head = document.createElement("div");
-    head.className = "resultTicketHead";
-    head.innerHTML = `
-      <span class="resultSet">${label}</span>
-      <span class="resultTag">${mode === "powerball" ? "White 5 + Power 1" : "K-Lotto 6/45"}</span>
-    `;
-    const wrap = balls(nums);
-    wrap.classList.add("resultNums");
-    if (mode === "powerball"){
-      const lastBall = wrap.lastElementChild;
-      if (lastBall) lastBall.classList.add("powerball");
-    }
-    card.appendChild(head);
-    card.appendChild(wrap);
-    return card;
-  }
-  function populateResultModal({ mode, lines, fortune }){
-    if (!resultModal || !resultTicketsEl || !resultFortuneEl) return;
-    resultEyebrow.textContent = mode === "powerball" ? "Powerball Result Window" : "K-Lotto Result Window";
-    resultTitleEl.textContent = mode === "powerball" ? "대박기원 파워볼 추천 번호" : "대박기원 로또 추천 번호";
-    resultDescEl.textContent = mode === "powerball"
-      ? "최신 Powerball 스냅샷을 바탕으로 정리한 5+1 참고 조합입니다."
-      : "최신 K-Lotto 스냅샷을 바탕으로 정리한 참고용 추천 조합입니다.";
-    resultTicketsEl.innerHTML = "";
-    resultFortuneEl.innerHTML = "";
-    lines.forEach((nums, idx) => {
-      resultTicketsEl.appendChild(createResultTicket(`SET ${idx + 1}`, nums, mode));
-    });
-    resultFortuneEl.appendChild(createFortuneBadge(fortune));
-  }
-  function openResultModal(){
-    if (!resultModal) return;
-    resultModal.classList.remove("hidden");
-    resultModal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
-  function closeResultModal(){
-    if (!resultModal) return;
-    resultModal.classList.add("hidden");
-    resultModal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-
-  function sampleUnique(max, count){
-    const chosen = new Set();
-    while (chosen.size < count){
-      chosen.add(1 + Math.floor(Math.random() * max));
-    }
-    return Array.from(chosen).sort((a,b)=>a-b);
-  }
-
-
-  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-  function clearUI(full=true){
-    hotEl.innerHTML = "";
-    coldEl.innerHTML = "";
-    overdueEl.innerHTML = "";
-    patternEl.innerHTML = "";
-    if (pbWhiteHotEl) pbWhiteHotEl.innerHTML = "";
-    if (pbWhiteColdEl) pbWhiteColdEl.innerHTML = "";
-    if (pbWhiteOverdueEl) pbWhiteOverdueEl.innerHTML = "";
-    if (pbRedStatsEl) pbRedStatsEl.innerHTML = "";
-    if (statusEl) statusEl.innerHTML = "";
-    kpiRow.innerHTML = "";
-    if (full) {
-      recoEl.innerHTML = `<div class="muted">먼저 <b>INITIATE LOTTO CORE</b>로 데이터를 불러오세요.</div>`;
-      logEl.textContent = "";
-    }
-  }
-
-  function setMode(mode){
-    const isPowerball = mode === "powerball";
-    analysisCards.forEach((el)=>el.classList.toggle("isHidden", isPowerball));
-    powerballCards.forEach((el)=>el.classList.toggle("isHidden", !isPowerball));
-    kpiRow.classList.toggle("isHidden", isPowerball);
-    if (powerballDisclaimer) powerballDisclaimer.classList.toggle("isHidden", !isPowerball);
-    if (modeNote){
-      modeNote.textContent = isPowerball
-        ? "현재 모드: US Powerball (5+1) · 스냅샷 기반 분석"
-        : "현재 모드: K-Lotto (6/45) · 스냅샷 기반 분석 제공";
-    }
-    if (descMain){
-      descMain.innerHTML = isPowerball
-        ? "Powerball 모드에서는 공개 데이터 스냅샷을 기반으로 가중치 샘플링을 수행합니다.<br><span class=\"mono muted\">※ 통계 요약, 당첨 보장 없음</span>"
-        : "버튼을 누르면 <b>가중치 기반 샘플링</b>과 <b>Hot/Cold/Overdue</b> + <b>연속/구간 패턴</b> 통계를 요약해 참고용 번호 조합을 제공합니다.<br><span class=\"mono muted\">※ 공개 데이터 또는 샘플 데이터 기반 통계 요약</span>";
-    }
-    if (btnGenerate){
-      btnGenerate.innerHTML = isPowerball
-        ? "RUN POWERBALL\n          <span class=\"sub\">5개 + 파워볼 1개 번호 생성</span>"
-        : "RUN AI ANALYSIS\n          <span class=\"sub\">로봇 HUD 계산 후 추천 번호 출력</span>";
-    }
-    clearUI(true);
-    if (isPowerball){
-      recoEl.innerHTML = `<div class="muted">Powerball 모드: <b>RUN POWERBALL</b>을 누르면 5+1 번호를 생성합니다.</div>`;
-    }
-  }
-
-  // ===== Button sparks (energy burst) =====
-  function spawnSparks(btn, count=18){
-    const rect = btn.getBoundingClientRect();
-    for (let i=0;i<count;i++){
-      const s = document.createElement("div");
-      s.className = "spark";
-      const x = Math.random() * rect.width;
-      const y = Math.random() * rect.height;
-      const dx = (Math.random() - 0.5) * 240;
-      const dy = (Math.random() - 0.5) * 200;
-      s.style.left = x + "px";
-      s.style.top = y + "px";
-      s.style.setProperty("--dx", dx + "px");
-      s.style.setProperty("--dy", dy + "px");
-      btn.appendChild(s);
-      setTimeout(()=>s.remove(), 800);
-    }
-  }
-
-  // ===== Background FX (stars/particles) =====
-  const canvas = $("bgFx");
-  const ctx = canvas.getContext("2d");
-  let W=0,H=0, stars=[];
-  function resize(){
-    W = canvas.width = Math.floor(window.innerWidth * devicePixelRatio);
-    H = canvas.height = Math.floor(window.innerHeight * devicePixelRatio);
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
-    stars = Array.from({length: 140}, () => ({
-      x: Math.random()*W,
-      y: Math.random()*H,
-      z: 0.4 + Math.random()*1.2,
-      r: (0.8 + Math.random()*1.6) * devicePixelRatio
-    }));
-  }
-  window.addEventListener("resize", resize);
-  resize();
-  function drawBg(){
-    ctx.clearRect(0,0,W,H);
-    // soft fog
-    const g = ctx.createRadialGradient(W*0.2,H*0.1, 0, W*0.2,H*0.1, Math.max(W,H)*0.7);
-    g.addColorStop(0, "rgba(70,243,255,0.08)");
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,W,H);
-
-    for (const s of stars){
-      s.x -= 0.10 * s.z * devicePixelRatio;
-      if (s.x < -20) s.x = W + 20, s.y = Math.random()*H;
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(210,230,255,${0.25 + 0.35*(s.z/1.6)})`;
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fill();
-    }
-    requestAnimationFrame(drawBg);
-  }
-  drawBg();
-
-  async function loadSnapshot(){
-    if (snapshotMeta) return snapshotMeta;
-    const res = await fetch(SNAPSHOT_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error("스냅샷 파일을 불러오지 못했습니다.");
-    const data = await res.json();
-    if (!data || !Array.isArray(data.draws)) throw new Error("스냅샷 형식이 올바르지 않습니다.");
-    snapshotMeta = data;
-    return snapshotMeta;
-  }
-  async function loadPowerballSnapshot(){
-    if (pbSnapshotMeta) return pbSnapshotMeta;
-    const res = await fetch(POWERBALL_SNAPSHOT_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error("Powerball 스냅샷을 불러오지 못했습니다.");
-    const data = await res.json();
-    if (!data || !Array.isArray(data.draws)) throw new Error("Powerball 스냅샷 형식이 올바르지 않습니다.");
-    pbSnapshotMeta = data;
-    return pbSnapshotMeta;
-  }
-
-  function formatDateLabel(value){
-    if (!value) return "정보 없음";
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return String(value);
-    return d.toLocaleDateString("ko-KR");
-  }
-
-  function summarizeSnapshot(meta){
-    const count = Array.isArray(meta?.draws) ? meta.draws.length : 0;
-    if (!count) return "데이터 없음";
-    const first = meta.draws[0];
-    const last = meta.draws[count - 1];
-    if (first?.date && last?.date) return `${count}개 · ${first.date} ~ ${last.date}`;
-    if (first?.round && last?.round) return `${count}개 · 회차 ${first.round} ~ ${last.round}`;
-    return `${count}개 기록`;
-  }
-  function createSnapshotKpiCard(meta){
-    const count = Array.isArray(meta?.draws) ? meta.draws.length : 0;
-    const last = count ? meta.draws[count - 1] : null;
-    const card = document.createElement("div");
-    card.className = "kpiEmphasis";
-    card.innerHTML = `
-      <div class="kpiLabel">K-Lotto Snapshot</div>
-      <div class="kpiValue">${count ? `${count}회차 보유` : "스냅샷 없음"}</div>
-      <div class="kpiSub">
-        <span>최근 회차 ${last?.round || "-"}</span>
-        <span>업데이트 ${formatDateLabel(meta?.updatedAt)}</span>
-      </div>
-    `;
-    return card;
-  }
-  function createAnalysisRangeKpi(data){
-    const first = data[0];
-    const last = data[data.length - 1];
-    const card = document.createElement("div");
-    card.className = "kpiEmphasis";
-    card.innerHTML = `
-      <div class="kpiLabel">Analysis Range</div>
-      <div class="kpiValue">${last?.round || "-"}회 중심 분석</div>
-      <div class="kpiSub">
-        <span>${first?.round || "-"}회차부터 ${last?.round || "-"}회차</span>
-        <span>데이터 소스 ${dataSourceLabel}</span>
-      </div>
-    `;
-    return card;
-  }
-
-  async function refreshDataMeta(){
-    let kMeta = null;
-    let pbMeta = null;
-    try { kMeta = await loadSnapshot(); } catch {}
-    try { pbMeta = await loadPowerballSnapshot(); } catch {}
-
-    if (kDataStatus) kDataStatus.textContent = summarizeSnapshot(kMeta);
-    if (pbDataStatus) pbDataStatus.textContent = summarizeSnapshot(pbMeta);
-
-    const updatedCandidates = [kMeta?.updatedAt, pbMeta?.updatedAt].filter(Boolean);
-    const updated = updatedCandidates.length ? updatedCandidates.sort().slice(-1)[0] : null;
-    if (dataUpdated) dataUpdated.textContent = formatDateLabel(updated);
-  }
-
-  // ===== Synthetic data (no network) =====
-  function makeSeed(){
-    return Math.floor(Math.random()*1e9);
-  }
-  function seededRng(seed){
-    let s = seed >>> 0;
-    return () => {
-      s = (s * 1664525 + 1013904223) >>> 0;
-      return (s & 0xffffffff) / 0x100000000;
-    };
-  }
-  function mockDraw(rng){
-    const chosen = new Set();
-    while (chosen.size < 6){
-      const n = 1 + Math.floor(rng()*45);
-      chosen.add(n);
-    }
-    return Array.from(chosen).sort((a,b)=>a-b);
-  }
-  function mockDrawRange(rng, max, count){
-    const chosen = new Set();
-    while (chosen.size < count){
-      const n = 1 + Math.floor(rng()*max);
-      chosen.add(n);
-    }
-    return Array.from(chosen).sort((a,b)=>a-b);
-  }
-  function buildMockData(count=200){
-    const seed = makeSeed();
-    const rng = seededRng(seed);
-    const arr = [];
-    for (let i=1;i<=count;i++){
-      arr.push({ round: i, nums: mockDraw(rng) });
-    }
-    return { data: arr, seed };
-  }
-
-  async function mapLimit(items, limit, fn){
-    const results = new Array(items.length);
-    let idx = 0;
-    const workers = Array.from({length: limit}, async () => {
-      while (true){
-        const i = idx++;
-        if (i >= items.length) break;
-        results[i] = await fn(items[i], i);
-      }
-    });
-    await Promise.all(workers);
-    return results;
-  }
-
-  async function fetchRecentData(count){
-    const snap = await loadSnapshot();
-    const all = snap.draws || [];
-    if (!all.length) return [];
-    const slice = all.slice(Math.max(0, all.length - count));
-    return slice.map((d) => ({
-      round: Number(d.round),
-      nums: Array.isArray(d.nums) ? d.nums.slice().sort((a,b)=>a-b) : [],
-      bonus: Number(d.bonus),
-      date: d.date,
-    }));
-  }
-  async function fetchRecentPowerballData(count){
-    const snap = await loadPowerballSnapshot();
-    const all = snap.draws || [];
-    if (!all.length) return [];
-    const slice = all.slice(Math.max(0, all.length - count));
-    return slice.map((d) => ({
-      date: d.date,
-      white: Array.isArray(d.white) ? d.white.slice().sort((a,b)=>a-b) : [],
-      power: Number(d.power),
-    }));
-  }
-
-  // ===== Analysis =====
-  function freqAnalysis(data){
-    const freq = Array(46).fill(0);
-    for (const d of data) for (const n of d.nums) freq[n] += 1;
-    return freq;
-  }
-  function overdueAnalysis(data){
-    const latest = data[data.length-1]?.round ?? 0;
-    const lastSeen = Array(46).fill(null);
-    for (const d of data) for (const n of d.nums) lastSeen[n] = d.round;
-    const overdue = Array(46).fill(0);
-    for (let n=1;n<=45;n++){
-      overdue[n] = (lastSeen[n]==null) ? Infinity : (latest - lastSeen[n]);
-    }
-    return { overdue, latest };
-  }
-  function freqAnalysisRange(data, max, getter){
-    const freq = Array(max + 1).fill(0);
-    for (const d of data){
-      const nums = getter(d) || [];
-      for (const n of nums) if (n>=1 && n<=max) freq[n] += 1;
-    }
-    return freq;
-  }
-  function overdueAnalysisRange(data, max, getter){
-    const latest = Math.max(0, data.length - 1);
-    const lastSeen = Array(max + 1).fill(null);
-    data.forEach((d, idx) => {
-      const nums = getter(d) || [];
-      for (const n of nums) if (n>=1 && n<=max) lastSeen[n] = idx;
-    });
-    const overdue = Array(max + 1).fill(0);
-    for (let n=1;n<=max;n++){
-      overdue[n] = (lastSeen[n]==null) ? Infinity : (latest - lastSeen[n]);
-    }
-    return { overdue, latest };
-  }
-  function minmaxNormalize(arr, start=1, end=45){
-    let mn=Infinity, mx=-Infinity;
-    for (let i=start;i<=end;i++){
-      if (!Number.isFinite(arr[i])) continue;
-      mn=Math.min(mn,arr[i]); mx=Math.max(mx,arr[i]);
-    }
-    const out=Array(arr.length).fill(0);
-    for (let i=start;i<=end;i++){
-      if (!Number.isFinite(arr[i])) { out[i]=0; continue; }
-      out[i]=(arr[i]-mn)/((mx-mn)+1e-9);
-    }
-    return out;
-  }
-  function buildWeights(freq, overdue, wFreq=0.55, wOver=0.45, max=45){
-    const f=minmaxNormalize(freq, 1, max);
-    const o=minmaxNormalize(overdue, 1, max);
-    const w=Array(max + 1).fill(0);
-    for (let n=1;n<=max;n++){
-      w[n]=wFreq*f[n]+wOver*o[n];
-      w[n]=Math.max(w[n], 0.02);
-    }
-    return w;
-  }
-  function weightedSampleUnique(weights, k=6, max=45){
-    const chosen=new Set();
-    while (chosen.size<k){
-      let sum=0;
-      for (let i=1;i<=max;i++) sum += (chosen.has(i)?0:weights[i]);
-      let r=Math.random()*sum;
-      let pick=1;
-      for (let i=1;i<=max;i++){
-        if (chosen.has(i)) continue;
-        r -= weights[i];
-        if (r<=0){ pick=i; break; }
-      }
-      chosen.add(pick);
-    }
-    return Array.from(chosen).sort((a,b)=>a-b);
-  }
-  function weightedSampleOne(weights, max){
-    let sum=0;
-    for (let i=1;i<=max;i++) sum += weights[i];
-    let r=Math.random()*sum;
-    for (let i=1;i<=max;i++){
-      r -= weights[i];
-      if (r<=0) return i;
-    }
-    return 1 + Math.floor(Math.random() * max);
-  }
-
-  // Pattern analysis (연속/구간)
-  function consecutiveInfo(numsSorted){
-    let streaks=[],cur=1;
-    for (let i=1;i<numsSorted.length;i++){
-      if (numsSorted[i]===numsSorted[i-1]+1) cur++;
-      else { streaks.push(cur); cur=1; }
-    }
-    streaks.push(cur);
-    const longest=Math.max(...streaks);
-    const hasConsecutive=streaks.some(s=>s>=2);
-    const groups=streaks.filter(s=>s>=2).length;
-    return {hasConsecutive,longest,groups};
-  }
-  function rangeBucket(n){
-    if (n<=10) return "1-10";
-    if (n<=20) return "11-20";
-    if (n<=30) return "21-30";
-    if (n<=40) return "31-40";
-    return "41-45";
-  }
-  function patternAnalysis(data){
-    let drawsWithConsecutive=0;
-    const longestStreakDist={};
-    let maxLongest=1;
-    const bucketCount={"1-10":0,"11-20":0,"21-30":0,"31-40":0,"41-45":0};
-    const perDrawBucketPattern=new Map();
-
-    for (const d of data){
-      const nums=[...d.nums].sort((a,b)=>a-b);
-      const ci=consecutiveInfo(nums);
-      if (ci.hasConsecutive) drawsWithConsecutive++;
-      maxLongest=Math.max(maxLongest,ci.longest);
-      longestStreakDist[ci.longest]=(longestStreakDist[ci.longest]||0)+1;
-
-      const buckets={"1-10":0,"11-20":0,"21-30":0,"31-40":0,"41-45":0};
-      for (const n of nums){
-        const b=rangeBucket(n);
-        bucketCount[b]+=1;
-        buckets[b]+=1;
-      }
-      const pattern = Object.values(buckets).filter(v=>v>0).sort((a,b)=>b-a).join("-");
-      perDrawBucketPattern.set(pattern, (perDrawBucketPattern.get(pattern)||0)+1);
-    }
-
-    const totalDraws=data.length;
-    const consecutiveRate=(drawsWithConsecutive/totalDraws)*100;
-    const topBucketPatterns=[...perDrawBucketPattern.entries()]
-      .sort((a,b)=>b[1]-a[1]).slice(0,5)
-      .map(([pattern,count])=>({pattern,count}));
-
-    return {totalDraws,drawsWithConsecutive,consecutiveRate,longestStreakDist,maxLongest,bucketCount,topBucketPatterns};
-  }
-
-  // ===== Render =====
-  function getAnalysisData(){
-    return dataCache.concat(generatedCache);
-  }
-
-  function renderAll(options = {}){
-    const { preserveReco = false } = options;
-    hotEl.innerHTML=""; coldEl.innerHTML=""; overdueEl.innerHTML=""; patternEl.innerHTML=""; kpiRow.innerHTML="";
-    if (statusEl) statusEl.innerHTML="";
-    const data = getAnalysisData();
-    if (!data.length){
-      recoEl.innerHTML = `<div class="muted">데이터가 없습니다. 먼저 수집을 실행하세요.</div>`;
-      return;
-    }
-
-    // KPIs
-    const first=data[0].round, last=data[data.length-1].round;
-    const k1=document.createElement("div"); k1.className="kpi"; k1.innerHTML=`<span class="miniDot"></span><b>최신회차 분석완료</b>`;
-    kpiRow.append(k1);
-    if (generatedCache.length){
-      const k2=document.createElement("div");
-      k2.className="kpi";
-      k2.innerHTML=`<span class="miniDot"></span><b>생성 반영</b><span class="muted">${generatedCache.length}회</span>`;
-      kpiRow.append(k2);
-    }
-
-    // Analysis
-    const freq=freqAnalysis(data);
-    const {overdue, latest}=overdueAnalysis(data);
-    weightsCache = buildWeights(freq, overdue, 0.55, 0.45);
-
-    // HOT/COLD
-    const pairs=[];
-    for (let n=1;n<=45;n++) pairs.push([n,freq[n]]);
-    pairs.sort((a,b)=>b[1]-a[1]);
-    pairs.slice(0,10).forEach(([n,c])=>hotEl.appendChild(chip(n, `${c}회`)));
-    pairs.slice().sort((a,b)=>a[1]-b[1]).slice(0,10).forEach(([n,c])=>coldEl.appendChild(chip(n, `${c}회`)));
-
-    // Overdue
-    const od=[];
-    for (let n=1;n<=45;n++) if (Number.isFinite(overdue[n])) od.push([n,overdue[n]]);
-    od.sort((a,b)=>b[1]-a[1]);
-    od.slice(0,10).forEach(([n,d])=>overdueEl.appendChild(chip(n, `${d}회 미출현`)));
-
-    // Pattern
-    const pat=patternAnalysis(data);
-    patternEl.appendChild(chip("연속 출현", `${pat.drawsWithConsecutive}/${pat.totalDraws} (${pat.consecutiveRate.toFixed(1)}%)`));
-    patternEl.appendChild(chip("최대 연속", `${pat.maxLongest}연속`));
-    Object.entries(pat.longestStreakDist).sort((a,b)=>Number(b[0])-Number(a[0])).slice(0,3)
-      .forEach(([len,cnt])=>patternEl.appendChild(chip(`최장 ${len}연속`, `${cnt}회`)));
-
-    const totalNums=pat.totalDraws*6;
-    Object.entries(pat.bucketCount)
-      .map(([b,c])=>({b,c,p:(c/totalNums)*100}))
-      .sort((a,b)=>b.c-a.c)
-      .forEach(x=>patternEl.appendChild(chip(`구간 ${x.b}`, `${x.c}개 (${x.p.toFixed(1)}%)`)));
-    pat.topBucketPatterns.forEach(x=>patternEl.appendChild(chip(`패턴 ${x.pattern}`, `${x.count}회`)));
-
-    // Status
-    if (statusEl){
-      statusEl.appendChild(chip("최신 회차", latest));
-      statusEl.appendChild(chip("가중치", "READY"));
-      statusEl.appendChild(chip("데이터 소스", dataSourceLabel));
-      if (generatedCache.length){
-        statusEl.appendChild(chip("생성 반영", `${generatedCache.length}회 누적`));
-      }
-      if (snapshotMeta?.updatedAt){
-        statusEl.appendChild(chip("스냅샷 시각", new Date(snapshotMeta.updatedAt).toLocaleDateString()));
-      }
-    }
-
-    if (!preserveReco){
-      recoEl.innerHTML = `<div class="muted">준비 완료. <b>RUN AI ANALYSIS</b>를 누르면 결과 창에서 추천 번호를 확인할 수 있습니다.</div>`;
-    }
-    btnGenerate.disabled = false;
-  }
-
-  function renderPowerballAnalysis(){
-    if (!pbDataCache.length){
-      recoEl.innerHTML = `<div class="muted">Powerball 데이터가 없습니다. 스냅샷을 확인하세요.</div>`;
-      return;
-    }
-    const whiteFreq = freqAnalysisRange(pbDataCache, 69, (d)=>d.white);
-    const whiteOver = overdueAnalysisRange(pbDataCache, 69, (d)=>d.white);
-    const redFreq = freqAnalysisRange(pbDataCache, 26, (d)=>[d.power]);
-    const redOver = overdueAnalysisRange(pbDataCache, 26, (d)=>[d.power]);
-    pbWeightsWhite = buildWeights(whiteFreq, whiteOver.overdue, 0.55, 0.45, 69);
-    pbWeightsRed = buildWeights(redFreq, redOver.overdue, 0.55, 0.45, 26);
-
-    if (pbWhiteHotEl) pbWhiteHotEl.innerHTML = "";
-    if (pbWhiteColdEl) pbWhiteColdEl.innerHTML = "";
-    if (pbWhiteOverdueEl) pbWhiteOverdueEl.innerHTML = "";
-    if (pbRedStatsEl) pbRedStatsEl.innerHTML = "";
-
-    const whitePairs = [];
-    for (let n=1;n<=69;n++) whitePairs.push([n, whiteFreq[n]]);
-    whitePairs.sort((a,b)=>b[1]-a[1]);
-    whitePairs.slice(0,10).forEach(([n,c])=>pbWhiteHotEl.appendChild(chip(n, `${c}회`)));
-    whitePairs.slice().sort((a,b)=>a[1]-b[1]).slice(0,10).forEach(([n,c])=>pbWhiteColdEl.appendChild(chip(n, `${c}회`)));
-
-    const whiteOd = [];
-    for (let n=1;n<=69;n++) if (Number.isFinite(whiteOver.overdue[n])) whiteOd.push([n, whiteOver.overdue[n]]);
-    whiteOd.sort((a,b)=>b[1]-a[1]);
-    whiteOd.slice(0,10).forEach(([n,d])=>pbWhiteOverdueEl.appendChild(chip(n, `${d}회 미출현`)));
-
-    const redPairs = [];
-    for (let n=1;n<=26;n++) redPairs.push([n, redFreq[n]]);
-    redPairs.sort((a,b)=>b[1]-a[1]);
-    redPairs.slice(0,8).forEach(([n,c])=>pbRedStatsEl.appendChild(chip(`HOT ${n}`, `${c}회`)));
-    redPairs.slice().sort((a,b)=>a[1]-b[1]).slice(0,6).forEach(([n,c])=>pbRedStatsEl.appendChild(chip(`COLD ${n}`, `${c}회`)));
-    const redOd = [];
-    for (let n=1;n<=26;n++) if (Number.isFinite(redOver.overdue[n])) redOd.push([n, redOver.overdue[n]]);
-    redOd.sort((a,b)=>b[1]-a[1]);
-    redOd.slice(0,6).forEach(([n,d])=>pbRedStatsEl.appendChild(chip(`OVERDUE ${n}`, `${d}회 미출현`)));
-
-    recoEl.innerHTML = `<div class="muted">준비 완료. <b>RUN POWERBALL</b>을 누르면 추천 번호를 생성합니다.</div>`;
-  }
-
-  function renderRecommendations(lines){
-    recoEl.innerHTML = `<div class="muted">결과 창이 열렸습니다. 창을 닫으면 이 자리에서는 다시 안내 문구만 보입니다.</div>`;
-    const generated = [];
-    for (let i=1;i<=lines;i++){
-      const pick=weightedSampleUnique(weightsCache, 6, 45);
-      generated.push(pick);
-    }
-    populateResultModal({
-      mode: "kr",
-      lines: generated,
-      fortune: buildMoneyFortune(generated, "kr"),
-    });
-    if (generated.length){
-      const start = baseLastRound + generatedCache.length + 1;
-      generated.forEach((nums, idx) => {
-        generatedCache.push({ round: start + idx, nums });
-      });
-      renderAll({ preserveReco: true });
-    }
-  }
-
-  function renderPowerballRecommendations(lines){
-    recoEl.innerHTML = `<div class="muted">결과 창이 열렸습니다. 창을 닫으면 이 자리에서는 다시 안내 문구만 보입니다.</div>`;
-    const generated = [];
-    for (let i=1;i<=lines;i++){
-      const whites = pbWeightsWhite
-        ? weightedSampleUnique(pbWeightsWhite, 5, 69)
-        : sampleUnique(69, 5);
-      const power = pbWeightsRed
-        ? weightedSampleOne(pbWeightsRed, 26)
-        : 1 + Math.floor(Math.random() * 26);
-      generated.push([...whites, power]);
-    }
-    populateResultModal({
-      mode: "powerball",
-      lines: generated,
-      fortune: buildMoneyFortune(generated, "powerball"),
-    });
-    openResultModal();
-  }
-
-  // ===== HUD =====
-  function hudOpen(){
-    hud.classList.remove("hidden");
-    hud.setAttribute("aria-hidden","false");
-    hudBar.style.width="0%";
-    hudPct.textContent="0%";
-    hudStep.textContent="BOOTING…";
-    hudConsole.textContent="";
-    setPowerballLoader(false);
-  }
-  function hudCloseNow(){
-    hud.classList.add("hidden");
-    hud.setAttribute("aria-hidden","true");
-    setPowerballLoader(false);
-  }
-  function setPowerballLoader(active){
-    if (!powerballLoader) return;
-    powerballLoader.classList.toggle("isActive", active);
-    powerballLoader.setAttribute("aria-hidden", active ? "false" : "true");
-  }
-  function hudLog(line){
-    hudConsole.textContent += line + "\n";
-    hudConsole.scrollTop = hudConsole.scrollHeight;
-  }
-  hudClose.addEventListener("click", hudCloseNow);
-  hud.addEventListener("click", (e)=>{
-    if (e.target === hud || e.target.classList.contains("hudBg")) hudCloseNow();
-  });
-  if (resultClose){
-    resultClose.addEventListener("click", closeResultModal);
-  }
-  if (resultModal){
-    resultModal.addEventListener("click", (e) => {
-      if (e.target === resultModal || e.target.classList.contains("resultBackdrop")) closeResultModal();
-    });
-  }
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape"){
-      if (resultModal && !resultModal.classList.contains("hidden")) closeResultModal();
-      else if (hud && !hud.classList.contains("hidden")) hudCloseNow();
-    }
-  });
-
-  async function runRobotCompute(lines){
-    if (!weightsCache){
-      if (dataCache && dataCache.length){
-        const freq=freqAnalysis(dataCache);
-        const {overdue}=overdueAnalysis(dataCache);
-        weightsCache = buildWeights(freq, overdue, 0.55, 0.45);
-        robot("가중치 재계산 완료. 추천 조합 생성 중…");
-      } else {
-        robot("데이터 없음. 먼저 수집/분석을 실행하세요.");
-        return;
-      }
-    }
-    const seed = Math.floor(Math.random()*1e9);
-    const sig = (Math.random()*100).toFixed(2)+"%";
-    seedEl.textContent=seed;
-    sigEl.textContent=sig;
-
-    hudOpen();
-    hudFrame.classList.add("shake");
-    setTimeout(()=>hudFrame.classList.remove("shake"), 520);
-
-    hudLog(`[${ROBOT}] CORE ONLINE`);
-    await sleep(220);
-
-    const steps=[
-      ["최신 회차 인덱스 고정", 14],
-      ["빈도 벡터 정규화", 30],
-      ["미출현 필드 스캔", 46],
-      ["가중치 맵 합성", 62],
-      ["몬테카를로 샘플링", 80],
-      ["티켓 페이로드 압축", 94],
-      ["에너지 방출", 100],
-    ];
-
-    for (const [label,pct] of steps){
-      hudStep.textContent = label + "…";
-      hudLog(`[${ROBOT}] ${label} ✓`);
-      const cur = Number(hudPct.textContent.replace("%","")) || 0;
-      for (let p=cur; p<=pct; p+=2){
-        hudBar.style.width = p+"%";
-        hudPct.textContent = p+"%";
-        await sleep(14);
-      }
-      await sleep(140);
-    }
-
-    renderRecommendations(lines);
-    robot("추천 번호 생성 완료.");
-    hudStep.textContent = "RESULT TRANSFER…";
-    hudLog(`[${ROBOT}] Ticket lines delivered.`);
-    await sleep(360);
-    hudCloseNow();
-    openResultModal();
-  }
-
-  async function prepareAnalysis(){
-    clearUI(true);
-    btnGenerate.disabled = true;
-    robot("AI 코어 부팅…");
-    try {
-      // Loading HUD: advanced AI analysis
-      hudOpen();
-      hudFrame.classList.add("analyzing");
-      hudBar.style.width = "12%";
-      hudPct.textContent = "12%";
-      hudStep.textContent = "과거 데이터 분석중…";
-      hudConsole.textContent = "";
-      hudLog("[LottoMind-AI] 양자 휴리스틱 스캔 부팅");
-      await sleep(280);
-      hudBar.style.width = "24%";
-      hudPct.textContent = "24%";
-      hudLog("[LottoMind-AI] 히스토리 벡터 잠금");
-      await sleep(280);
-      hudBar.style.width = "38%";
-      hudPct.textContent = "38%";
-      hudLog("[LottoMind-AI] 확률 메쉬 안정화");
-      await sleep(280);
-      hudBar.style.width = "52%";
-      hudPct.textContent = "52%";
-      hudLog("[LottoMind-AI] 패턴 왜곡 보정");
-      await sleep(280);
-      hudBar.style.width = "66%";
-      hudPct.textContent = "66%";
-      hudLog("[LottoMind-AI] 가중치 코어 합성");
-      await sleep(280);
-      hudBar.style.width = "78%";
-      hudPct.textContent = "78%";
-      hudLog("[LottoMind-AI] 조합 탐색 엔진 가열");
-      await sleep(280);
-
-      let data = [];
-      try {
-        const snap = await loadSnapshot();
-        if (snap.draws && snap.draws.length){
-          const latest = Number(snap.draws?.[snap.draws.length-1]?.round || 0);
-          const count = Math.min(HISTORY_SIZE, snap.draws.length);
-          const start = Math.max(1, latest - count + 1);
-          dataSourceLabel = "SNAPSHOT";
-          robot(`스냅샷 로드 완료: ${snap.draws.length}회`);
-          robot(`${start}~${latest}회 구간 분석 중…`);
-          data = await fetchRecentData(count);
-        }
-      } catch {}
-
-      if (!data.length){
-        const { data: mock, seed } = buildMockData(HISTORY_SIZE);
-        dataSourceLabel = "SYNTHETIC";
-        robot("스냅샷 없음 → 합성 데이터로 분석합니다.");
-        robot(`합성 데이터 생성 완료 (seed=${seed})`);
-        data = mock;
-      }
-
-      dataCache = data;
-      generatedCache = [];
-      baseLastRound = Number(dataCache[dataCache.length - 1]?.round || dataCache.length || 0);
-      robot("분석 준비 완료.");
-      renderAll();
-
-      hudBar.style.width = "100%";
-      hudPct.textContent = "100%";
-      hudStep.textContent = "분석 완료";
-      hudLog("[LottoMind-AI] 코어 준비 완료");
-      await sleep(380);
-      hudCloseNow();
-      hudFrame.classList.remove("analyzing");
-    } catch (err){
-      const msg = err && err.message ? err.message : String(err);
-      robot(`데이터 수집 실패: ${msg}`);
-      recoEl.innerHTML = `<div class="muted">데이터를 불러오지 못했습니다. 새로고침 후 다시 시도하세요.</div>`;
-      hudCloseNow();
-      hudFrame.classList.remove("analyzing");
-    } finally {
-      btnGenerate.disabled = false;
-    }
-  }
-
-  async function preparePowerballAnalysis(){
-    clearUI(true);
-    btnGenerate.disabled = true;
-    robot("Powerball 분석 준비 중…");
-    hudOpen();
-    hudFrame.classList.add("analyzing");
-    setPowerballLoader(true);
-    hudStep.textContent = "POWERBALL SPIN…";
-    hudHint.textContent = "파워볼 회전 시퀀스 활성화";
-    hudBar.style.width = "12%";
-    hudPct.textContent = "12%";
-    hudLog(`[${ROBOT}] POWERBALL CORE ONLINE`);
-    try {
-      await sleep(280);
-      let data = [];
-      try {
-        const snap = await loadPowerballSnapshot();
-        if (snap.draws && snap.draws.length){
-          const count = Math.min(HISTORY_SIZE, snap.draws.length);
-          data = await fetchRecentPowerballData(count);
-          robot(`Powerball 스냅샷 로드 완료: ${snap.draws.length}회`);
-          robot(`최근 ${count}회 분석 (${POWERBALL_FORMAT_START}+ 규격)`);
-          hudStep.textContent = "SNAPSHOT LOADED…";
-          hudBar.style.width = "48%";
-          hudPct.textContent = "48%";
-          hudLog(`[${ROBOT}] SNAPSHOT LOADED (${count})`);
-        }
-      } catch (err){
-        const msg = err && err.message ? err.message : String(err);
-        robot(`Powerball 스냅샷 실패: ${msg}`);
-        hudLog(`[${ROBOT}] SNAPSHOT ERROR: ${msg}`);
-      }
-
-      if (!data.length){
-        const seed = makeSeed();
-        const rng = seededRng(seed);
-        const mock = Array.from({length: HISTORY_SIZE}, () => ({
-          date: new Date().toISOString().slice(0,10),
-          white: mockDrawRange(rng, 69, 5),
-          power: 1 + Math.floor(rng()*26),
-        }));
-        robot("Powerball 스냅샷 없음 → 합성 데이터로 분석합니다.");
-        robot(`합성 데이터 생성 완료 (seed=${seed})`);
-        hudStep.textContent = "SYNTHETIC SAMPLE…";
-        hudBar.style.width = "58%";
-        hudPct.textContent = "58%";
-        hudLog(`[${ROBOT}] SYNTHETIC DATA READY (seed=${seed})`);
-        data = mock;
-      }
-
-      pbDataCache = data;
-      renderPowerballAnalysis();
-      hudStep.textContent = "FINALIZING…";
-      hudBar.style.width = "100%";
-      hudPct.textContent = "100%";
-      hudLog(`[${ROBOT}] POWERBALL ANALYSIS COMPLETE`);
-      await sleep(360);
-    } catch (err){
-      const msg = err && err.message ? err.message : String(err);
-      robot(`Powerball 분석 실패: ${msg}`);
-      recoEl.innerHTML = `<div class="muted">Powerball 데이터를 불러오지 못했습니다.</div>`;
-      hudLog(`[${ROBOT}] POWERBALL ANALYSIS FAILED: ${msg}`);
-    } finally {
-      setPowerballLoader(false);
-      hudFrame.classList.remove("analyzing");
-      hudCloseNow();
-      btnGenerate.disabled = false;
-    }
-  }
-
-  // ===== Events =====
-  btnGenerate.addEventListener("click", async ()=>{
-    spawnSparks(btnGenerate, 28);
-    const lines = Math.min(10, Math.max(1, Number(lineCountEl.value || 10)));
-    const mode = lotteryTypeEl?.value || "kr";
-    if (mode === "powerball"){
-      await preparePowerballAnalysis();
-      renderPowerballRecommendations(lines);
-      return;
-    }
-    await prepareAnalysis();
-    await runRobotCompute(lines);
-  });
-  themeToggle.addEventListener("click", ()=>{
-    const cur = document.documentElement.getAttribute("data-theme");
-    applyTheme(cur === "light" ? "dark" : "light");
-  });
-  if (commentForm){
-    commentForm.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      const name = $("commentName")?.value?.trim() || "익명";
-      const body = $("commentBody")?.value?.trim();
-      if (!body) return;
-      const entry = { name, body, ts: new Date().toISOString() };
-      const items = loadComments();
-      items.push(entry);
-      saveComments(items);
-      renderComments();
-      commentForm.reset();
-
-      const fd = new FormData(commentForm);
-      fd.append("comment_ts", entry.ts);
-      try {
-        await fetch(commentForm.action, { method: "POST", body: fd, headers: { "Accept": "application/json" } });
-      } catch {}
-    });
-  }
-  if (commentClearAll){
-    commentClearAll.addEventListener("click", () => {
-      saveComments([]);
-      renderComments();
-    });
-  }
-  if (birthDateEl){
-    birthDateEl.addEventListener("change", persistFortuneProfile);
-  }
-  if (birthGenderEl){
-    birthGenderEl.addEventListener("change", persistFortuneProfile);
-  }
-  if (birthCalendarEl){
-    birthCalendarEl.addEventListener("change", persistFortuneProfile);
-  }
-  if (birthHourEl){
-    birthHourEl.addEventListener("change", persistFortuneProfile);
-  }
-  if (lotteryTypeEl){
-    lotteryTypeEl.addEventListener("change", (e) => {
-      setMode(e.target.value);
-    });
-  }
-  if (hubToggle && hubBody){
-    hubToggle.addEventListener("click", () => {
-      const isOpen = !hubBody.classList.contains("isCollapsed");
-      hubBody.classList.toggle("isCollapsed", isOpen);
-      hubToggle.setAttribute("aria-expanded", String(!isOpen));
-      hubToggle.textContent = isOpen ? "콘텐츠 허브 보기" : "콘텐츠 허브 닫기";
-      if (!isOpen){
-        hubBody.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    });
-  }
-
-  // ===== Init message =====
-  initTheme();
-  initFortuneProfile();
-  setMode(lotteryTypeEl?.value || "kr");
-  refreshDataMeta();
-  if (todayStamp){
-    todayStamp.textContent = `오늘: ${new Date().toLocaleDateString("ko-KR")}`;
-  }
-  robot("대기 중… 1) RUN AI ANALYSIS 클릭");
-  renderComments();
-})();
-</script>
+      resetBtn.addEventListener("click", resetView);
+      experimentType.addEventListener("change", updateHint);
+
+      updateHint();
+      resetView();
+    })();
+  </script>
 </body>
 </html>
