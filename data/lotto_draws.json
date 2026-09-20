@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-19T07:19:48.566Z",
+  "updatedAt": "2026-09-20T07:44:11.575Z",
   "source": "smok95.github.io/lotto/results/all.json",
   "draws": [
     {
@@ -16132,6 +16132,19 @@
         23,
         24,
         43
+      ],
+      "bonus": 9
+    },
+    {
+      "round": 1242,
+      "date": "2026-09-19",
+      "nums": [
+        2,
+        4,
+        10,
+        16,
+        31,
+        41
       ],
       "bonus": 9
     }
