@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-02T09:28:47.513Z",
+  "updatedAt": "2026-11-03T09:31:12.077Z",
   "format": "powerball-5+1",
   "formatStart": "2015-10-07",
   "source": "data.ny.gov/d/d6yy-54nr",
@@ -15700,6 +15700,17 @@
         56
       ],
       "power": 20
+    },
+    {
+      "date": "2026-11-02",
+      "white": [
+        7,
+        23,
+        29,
+        64,
+        66
+      ],
+      "power": 23
     }
   ]
 }
